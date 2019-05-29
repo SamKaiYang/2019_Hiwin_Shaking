@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # license removed for brevity
-#策略 機械手臂 撞球任務
+#策略 機械手臂 四點來回跑
 import rospy
 import os
 import numpy as np

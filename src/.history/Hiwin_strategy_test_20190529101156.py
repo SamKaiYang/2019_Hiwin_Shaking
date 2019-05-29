@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # license removed for brevity
-#策略 機械手臂 撞球任務
+#策略 機械手臂 四點來回跑
 import rospy
 import os
 import numpy as np
@@ -16,9 +16,7 @@ def Param():
     global PushBallHeight,ObjAboveHeight
     PushBallHeight = rospy.get_param("~Push_Height")
     ObjAboveHeight = rospy.get_param("~Above_Height")
-##------yoloV3
-from turtlesim.msg   import Pose
-from ROS_Socket.msg   import  ROI_array
+
 
 NAME = 'strategy_server'
 pos_feedback_times = 0
@@ -27,14 +25,7 @@ msg_feedback = 1
 Arm_state_flag = 0
 strategy_flag = 0
 arm_move_times = 1
-#-------yolov3 data
-obj_num = 0
-object_name = ''
-score = 0
-min_xy = 0
-max_xy = 0
-pic_times = 0
-ball_mid = 0
+
 class State_Flag():
     def __init__(self,Arm,Strategy):
         self.Arm = Arm
@@ -134,44 +125,7 @@ class point():
         self.pitch = pitch
         self.roll = roll
         self.yaw = yaw
-##------------------yolo_v3 stra.py-----------------
-def get_obj_info_cb(data):
-    global object_name,min_xy,max_xy,obj_num,score,pic_times,ball_mid,SpecifyBall_mid,CueBalll_mid
-    global GetInfoFlag
-    print("\n========== Detected object number = " + str(len(data.ROI_list)) + " ========== ")
-    for obj_num in range(len(data.ROI_list)):
-        object_name = data.ROI_list[obj_num].object_name
-        score       = data.ROI_list[obj_num].score
-        min_xy = np.array([data.ROI_list[obj_num].min_x, data.ROI_list[obj_num].min_y])
-        max_xy = np.array([data.ROI_list[obj_num].Max_x, data.ROI_list[obj_num].Max_y])
 
-        if(obj_num!=0):
-            print("\n")
-        print("----- object_" + str(obj_num) + " ----- ")
-        print("object_name = " + str(object_name))
-        print("score = " + str(score))
-        print("min_xy = [ " +  str(min_xy) +  " ]" )
-        print("max_xy = [ " +  str(max_xy) +  " ]" )
-
-        print("mid_xy = ["+str((min_xy+max_xy)/2)+"]")
-    ##-- yolov3 info
-    ## for 取 10張 信心值超過70%
-    ## 取出位置取平均
-
-        if  str(len(data.ROI_list)) == 2 and score >= 70:
-            pic_times+=1
-            if object_name == "Specify":
-                SpecifyBall_mid = np.array([SpecifyBall_mid + (min_xy+max_xy)/2])
-            if object_name == "Nine":
-                CueBalll_mid = np.array([CueBalll_mid[1] +  (min_xy+max_xy)/2])
-            if pic_times == 10:
-                SpecifyBall_mid = SpecifyBall_mid/10
-                CueBalll_mid = CueBalll_mid/10
-                ##image to real
-                # SpecifyBall_mid = SpecifyBall_mid
-                # CueBalll_mid = CueBalll_mid
-                GetInfoFlag = True
-    pic_times+=1
 ##-------------------------strategy---------------------
 ## 球桌與球與洞口參數
 UpLeft_X = -11

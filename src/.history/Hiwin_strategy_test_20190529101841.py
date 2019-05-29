@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # license removed for brevity
-#策略 機械手臂 撞球任務
+#策略 機械手臂 四點來回跑
 import rospy
 import os
 import numpy as np
@@ -10,15 +10,6 @@ from ROS_Socket.msg import *
 import math
 import listener as listen
 import enum
-import argparse
-
-def Param():
-    global PushBallHeight,ObjAboveHeight
-    PushBallHeight = rospy.get_param("~Push_Height")
-    ObjAboveHeight = rospy.get_param("~Above_Height")
-##------yoloV3
-from turtlesim.msg   import Pose
-from ROS_Socket.msg   import  ROI_array
 
 NAME = 'strategy_server'
 pos_feedback_times = 0
@@ -27,14 +18,7 @@ msg_feedback = 1
 Arm_state_flag = 0
 strategy_flag = 0
 arm_move_times = 1
-#-------yolov3 data
-obj_num = 0
-object_name = ''
-score = 0
-min_xy = 0
-max_xy = 0
-pic_times = 0
-ball_mid = 0
+
 class State_Flag():
     def __init__(self,Arm,Strategy):
         self.Arm = Arm
@@ -134,44 +118,7 @@ class point():
         self.pitch = pitch
         self.roll = roll
         self.yaw = yaw
-##------------------yolo_v3 stra.py-----------------
-def get_obj_info_cb(data):
-    global object_name,min_xy,max_xy,obj_num,score,pic_times,ball_mid,SpecifyBall_mid,CueBalll_mid
-    global GetInfoFlag
-    print("\n========== Detected object number = " + str(len(data.ROI_list)) + " ========== ")
-    for obj_num in range(len(data.ROI_list)):
-        object_name = data.ROI_list[obj_num].object_name
-        score       = data.ROI_list[obj_num].score
-        min_xy = np.array([data.ROI_list[obj_num].min_x, data.ROI_list[obj_num].min_y])
-        max_xy = np.array([data.ROI_list[obj_num].Max_x, data.ROI_list[obj_num].Max_y])
 
-        if(obj_num!=0):
-            print("\n")
-        print("----- object_" + str(obj_num) + " ----- ")
-        print("object_name = " + str(object_name))
-        print("score = " + str(score))
-        print("min_xy = [ " +  str(min_xy) +  " ]" )
-        print("max_xy = [ " +  str(max_xy) +  " ]" )
-
-        print("mid_xy = ["+str((min_xy+max_xy)/2)+"]")
-    ##-- yolov3 info
-    ## for 取 10張 信心值超過70%
-    ## 取出位置取平均
-
-        if  str(len(data.ROI_list)) == 2 and score >= 70:
-            pic_times+=1
-            if object_name == "Specify":
-                SpecifyBall_mid = np.array([SpecifyBall_mid + (min_xy+max_xy)/2])
-            if object_name == "Nine":
-                CueBalll_mid = np.array([CueBalll_mid[1] +  (min_xy+max_xy)/2])
-            if pic_times == 10:
-                SpecifyBall_mid = SpecifyBall_mid/10
-                CueBalll_mid = CueBalll_mid/10
-                ##image to real
-                # SpecifyBall_mid = SpecifyBall_mid
-                # CueBalll_mid = CueBalll_mid
-                GetInfoFlag = True
-    pic_times+=1
 ##-------------------------strategy---------------------
 ## 球桌與球與洞口參數
 UpLeft_X = -11
@@ -223,24 +170,24 @@ class MissionType(enum.IntEnum):
 class pos():
     def __init__(self, x, y, z, pitch, roll, yaw):
         self.x = 0
-        self.y = 50
-        self.z = 20
+        self.y = 36.8
+        self.z = 11.5
         self.pitch = -90
         self.roll = 0
         self.yaw = 0
 class Target_pos():
     def __init__(self, x, y, z, pitch, roll, yaw):
         self.x = 0
-        self.y = 50
-        self.z = 20
+        self.y = 36.8
+        self.z = 11.5
         self.pitch = -90
         self.roll = 0
         self.yaw = 0
 class TargetPush_pos():
     def __init__(self, x, y, z, pitch, roll, yaw):
         self.x = 0
-        self.y = 50
-        self.z = 20
+        self.y = 36.8
+        self.z = 11.5
         self.pitch = -90
         self.roll = 0
         self.yaw = 0
@@ -249,75 +196,7 @@ class Item():
         self.x = x
         self.y = y
         self.label = label
-def Billiards_Calculation():
-    global angle_SubCue,HoleState,SpecifyBall_mid
-    # SpecifyBall=Item(SpecifyBall_mid[0],SpecifyBall_mid[1],0)#母球
-    # CueBall=Item(CueBalll_mid[0],CueBalll_mid[1],9)#子球
-    #test
-    SpecifyBall=Item(33.5,57,0)#子球
-    CueBall=Item(10.5,57,9)#母球
-    if SpecifyBall.x <= ((UpLeft_X+UpRight_X)/2) and SpecifyBall.y >= ((UpLeft_Y+DownLeft_Y)/2):
-        HoleState = 0
-        Hole_X = UpLeft_X
-        Hole_Y = UpLeft_Y
-    elif SpecifyBall.x > ((UpLeft_X+UpRight_X)/2) and SpecifyBall.y >= ((UpRight_Y+DownRight_Y)/2):
-        HoleState = 1
-        Hole_X = UpRight_X
-        Hole_Y = UpRight_Y
-    elif SpecifyBall.x <= ((DownLeft_X+DownRight_X)/2) and SpecifyBall.y < ((UpLeft_Y+DownLeft_Y)/2):
-        HoleState = 2
-        Hole_X = DownLeft_X
-        Hole_Y = DownLeft_Y
-    elif SpecifyBall.x > ((DownLeft_X+DownRight_X)/2) and SpecifyBall.y < ((UpRight_Y+DownRight_Y)/2):
-        HoleState = 3
-        Hole_X = DownRight_X
-        Hole_Y = DownLeft_Y
-    Sub_Hole_X = SpecifyBall.x - Hole_X
-    Sub_Hole_Y = SpecifyBall.y - Hole_Y
-    if Sub_Hole_X == 0:
-        angle_HoleSub = math.pi/2.0
-    else:
-        angle_HoleSub = math.atan(math.fabs(Sub_Hole_Y/Sub_Hole_X))
-    if Sub_Hole_X <0.0 and Sub_Hole_Y >= 0.0:
-        angle_HoleSub = math.pi -angle_HoleSub
-    elif Sub_Hole_X <0.0 and Sub_Hole_Y <0.0:
-        angle_HoleSub = math.pi +angle_HoleSub
-    elif Sub_Hole_X >=0.0 and Sub_Hole_Y <0.0:
-        angle_HoleSub = math.pi*2.0 -angle_HoleSub
-    angle_HoleSub = angle_HoleSub*180/math.pi
-    Ball_radius_X = 2*Ball_radius*math.cos(angle_HoleSub*math.pi/180)
-    Ball_radius_Y = 2*Ball_radius*math.sin(angle_HoleSub*math.pi/180)
-    Cub_Sub_X = CueBall.x - SpecifyBall.x + Ball_radius_X
-    Cub_Sub_Y = CueBall.y - SpecifyBall.y + Ball_radius_Y
 
-    if Cub_Sub_X ==0.0:
-        angle_SubCue = math.pi/2.0
-    else:
-        angle_SubCue = math.atan(math.fabs(Cub_Sub_Y/Cub_Sub_X))
-    if Cub_Sub_X < 0.0 and Cub_Sub_Y >= 0.0:
-        angle_SubCue = math.pi - angle_SubCue
-    elif Cub_Sub_X < 0.0 and Cub_Sub_Y < 0.0:
-        angle_SubCue = math.pi + angle_SubCue
-    elif Cub_Sub_X >=0.0 and Cub_Sub_Y < 0.0:
-        angle_SubCue = math.pi*2.0 - angle_SubCue
-    angle_SubCue = angle_SubCue*180/math.pi
-    ##球直徑3.12cm
-    Target_pos.x = CueBall.x + 7.5*Ball_radius*math.cos(angle_SubCue*math.pi/180)
-    Target_pos.y = CueBall.y + 7.5*Ball_radius*math.sin(angle_SubCue*math.pi/180)
-    TargetPush_pos.x = CueBall.x
-    TargetPush_pos.y = CueBall.y
-
-    angle_SubCue = angle_SubCue -90;#轉換手臂角度 ROLL
-	##---轉換角度從指向母球至指向子球
-    if angle_SubCue >= 180:
-    	angle_SubCue = angle_SubCue -180
-    elif angle_SubCue <= -180:
-        angle_SubCue = angle_SubCue +180
-    elif angle_SubCue >0 :
-        angle_SubCue = angle_SubCue -180
-    elif angle_SubCue <=0:
-        angle_SubCue = angle_SubCue +180
-    return TargetPush_pos,Target_pos,angle_SubCue
 def Mission_Trigger():
     if GetInfoFlag == True and GetKeyFlag == False and ExecuteFlag == False:
         GetInfo_Mission()
@@ -328,7 +207,7 @@ def Mission_Trigger():
 def GetInfo_Mission():
     global GetInfoFlag,GetKeyFlag,ExecuteFlag
 
-    Billiards_Calculation()
+    #Billiards_Calculation()
 
     GetInfoFlag = False
     GetKeyFlag = True
@@ -418,12 +297,12 @@ def MotionItem(ItemNo):
             print("Arm_StopPush")
             break
         if case(ArmMotionCommand.Arm_MoveToTargetUpside):
-            pos.x = Target_pos.x
-            pos.y = Target_pos.y
-            pos.z = ObjAboveHeight
+            pos.x = 10
+            pos.y = 36.8
+            pos.z = 11.5
             pos.pitch = -90
-            pos.roll = -(angle_SubCue) #RobotArm5
-            pos.yaw = 0
+            pos.roll = 0
+            pos.yaw = 10
             MoveFlag = True
             LinePtpFlag = False
             SpeedValue = 10
@@ -444,9 +323,9 @@ def MotionItem(ItemNo):
             print("Arm_LineDown")
             break
         if case(ArmMotionCommand.Arm_PushBall):
-            pos.x = TargetPush_pos.x
-            pos.y = TargetPush_pos.y
-            pos.z = PushBallHeight
+            pos.x = -10
+            pos.y = 36.8
+            pos.z = 11.5
             pos.pitch = -90
             pos.roll = -(angle_SubCue)
             pos.yaw = 0
@@ -506,11 +385,6 @@ if __name__ == '__main__':
     strategy_server()
 
     GetInfoFlag = True #Test no data
-    # try:
-    #     rospy.Subscriber('/object/ROI_array', ROI_array, get_obj_info_cb)
-    # except rospy.ROSInterruptException:
-    #     rospy.loginfo('error')
-    #     pass
     while 1:
         Mission_Trigger()
         if CurrentMissionType == MissionType.Mission_End:
