@@ -175,7 +175,7 @@ def socket_client():
                 feedback = 6
                 socket_client_arm_state(feedback)
                 print("shutdown")
-            #Arm_feedback = TCP.Is_busy(feedback)
+            Arm_feedback = TCP.Is_busy(feedback)
             ###test 0403
         ##---------------socket 傳輸手臂命令 end-----------------
             if Arm_feedback == Taskcmd.Arm_feedback_Type.shutdown:
