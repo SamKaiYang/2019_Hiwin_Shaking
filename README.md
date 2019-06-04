@@ -1,9 +1,11 @@
 # create ROS file and How use
 1. cd ~/catkin_ws/src
-2. git clone https://github.com/SamKaiYang/ROS_Socket_Arm.git
-3. cd ~/catkin_ws
-4. catkin_make
-5. source ./devel/setup.bash
+2. git clone https://github.com/SamKaiYang/ROS_Socket.git
+3. cd ROS_Socket
+4. mkdir -p include/ROS_Socket
+5. cd ~/catkin_ws
+6. catkin_make
+7. source ./devel/setup.bash
 
 # yolo_v3_keras
 The demo code of YOLO_V3
