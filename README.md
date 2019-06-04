@@ -1,3 +1,10 @@
+# create ROS file and How use
+1. cd ~/catkin_ws/src
+2. git clone https://github.com/SamKaiYang/ROS_Socket_Arm.git
+3. cd ~/catkin_ws
+4. catkin_make
+5. source ./devel/setup.bash
+
 # yolo_v3_keras
 The demo code of YOLO_V3
 
