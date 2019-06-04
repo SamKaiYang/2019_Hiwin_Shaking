@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # license removed for brevity
-#策略 機械手臂 撞球任務
+#策略 機械手臂 四點來回跑
 import rospy
 import os
 import numpy as np
@@ -8,17 +8,12 @@ from std_msgs.msg import String
 from ROS_Socket.srv import *
 from ROS_Socket.msg import *
 import math
+import listener as listen
 import enum
-import argparse
 
-def Param():
-    global PushBallHeight,ObjAboveHeight
-    PushBallHeight = rospy.get_param("~Push_Height")
-    ObjAboveHeight = rospy.get_param("~Above_Height")
 ##------yoloV3
-from turtlesim.msg   import Pose
-from ROS_Socket.msg   import  ROI_array
-
+from turtlesim.msg   import Pose    
+from ROS_Socket.msg   import  ROI_array 
 NAME = 'strategy_server'
 pos_feedback_times = 0
 mode_feedback_times = 0
@@ -85,7 +80,7 @@ def Arm_state(req):
         return(0)
     if Arm_state_flag == 6: #表示程式中斷
         strategy_flag = 6
-        return(6)
+        return(6)   
     if CurrentMissionType == MissionType.Mission_End:
         return('socket stop')
 def strategy_server():
@@ -99,12 +94,13 @@ def strategy_client_pos_move(x,y,z,pitch,roll,yaw):
     global pos_feedback_times
 
     rospy.wait_for_service('arm_pos')
-
+ 
     try:
         # create a handle to the add_two_ints service
         Arm_pos_client = rospy.ServiceProxy('arm_pos', arm_data)
         pos_feedback = Arm_pos_client(x,y,z,pitch,roll,yaw)
         pos_feedback_times = pos_feedback.response
+    
         return pos_feedback_times
     except rospy.ServiceException as e:
         print ("Service call failed: %s"%e)
@@ -115,24 +111,27 @@ def strategy_client_Arm_Mode(action,ra,grip,vel,both):
     global mode_feedback_times
 
     rospy.wait_for_service('arm_mode')
+ 
     try:
         # create a handle to the add_two_ints service
         Arm_mode_client = rospy.ServiceProxy('arm_mode', arm_mode)
         mode_feedback = Arm_mode_client(grip,ra,action,vel,both)
         mode_feedback_times = mode_feedback.mode
+    
         return mode_feedback_times
     except rospy.ServiceException as e:
         print ("Service call failed: %s"%e)
-##------------client end-------
+##------------client end-------  
 ##------------class-------
 class point():
+    
     def __init__(self,x,y,z,pitch,roll,yaw):
         self.x = x
         self.y = y
         self.z = z
         self.pitch = pitch
         self.roll = roll
-        self.yaw = yaw
+        self.yaw = yaw 
 ##------------------yolo_v3 stra.py-----------------
 def get_obj_info_cb(data):
     global object_name,min_xy,max_xy,obj_num,score,pic_times,ball_mid,SpecifyBall_mid,CueBalll_mid
@@ -152,10 +151,7 @@ def get_obj_info_cb(data):
         print("min_xy = [ " +  str(min_xy) +  " ]" )
         print("max_xy = [ " +  str(max_xy) +  " ]" )
 
-        print("mid_xy = ["+str((min_xy+max_xy)/2)+"]")
-    ##-- yolov3 info
-    ## for 取 10張 信心值超過70%
-    ## 取出位置取平均
+        print("mid_xy = ["+str(min_xy+max_xy)+"]")
 
         if  str(len(data.ROI_list)) == 2 and score >= 70:
             pic_times+=1
@@ -164,8 +160,8 @@ def get_obj_info_cb(data):
             if object_name == "Nine":
                 CueBalll_mid = np.array([CueBalll_mid[1] +  (min_xy+max_xy)/2])
             if pic_times == 10:
-                SpecifyBall_mid = SpecifyBall_mid/10
-                CueBalll_mid = CueBalll_mid/10
+                SpecifyBall_mid = SpecifyBall_mid/50
+                CueBalll_mid = CueBalll_mid/50
                 ##image to real
                 # SpecifyBall_mid = SpecifyBall_mid
                 # CueBalll_mid = CueBalll_mid
@@ -173,16 +169,15 @@ def get_obj_info_cb(data):
     pic_times+=1
 ##-------------------------strategy---------------------
 ## 球桌與球與洞口參數
-UpLeft_X = -11
-UpLeft_Y = 72
-UpRight_X = 50
-UpRight_Y = 72
-DownLeft_X = -11
-DownLeft_Y = 43
-DownRight_X = 50
-DownRight_Y = 43
-
-Ball_radius = 1.56
+UpLeft_X = -30
+UpLeft_Y = 57.8
+UpRight_X = 30
+UpRight_Y = 57.8
+DownLeft_X = -30
+DownLeft_Y = 17.8
+DownRight_X = 30
+DownRight_Y = 17.8
+Ball_radius = 2.75
 HoleState = 0
 Hole_X = 0
 Hole_Y = 0
@@ -197,22 +192,47 @@ MotionStep = 0
 angle_SubCue = 0
 LinePtpFlag = False
 MoveFlag = False
-PushBallHeight = 3
-ObjAboveHeight = 11
+PushBallHeight = 20
+ObjAboveHeight = 20
 SpeedValue = 10
 MissionEndFlag = False
 CurrentMissionType = 0
+###------------------搖飲料任務動作------
+# 1.將茶夾起
+# 2.移動到雪客杯上方
+# 3.倒入茶 轉角度roll
+# 4.鬆開夾指放置茶
+# 5.按一下 按壓瓶
+# 6.移至冰塊上方 進行夾取
+# 7.重複上述動作兩次(冰塊兩塊)
+# 8.夾取蓋子 
+# 9.搖飲料roll
+# 10.開蓋子
+
 ##---------------Enum---------------##
 class ArmMotionCommand(enum.IntEnum):
     Arm_Stop = 0
-    Arm_MoveToTargetUpside = 1
-    Arm_MoveFowardDown = 2
-    Arm_MoveVision = 3
-    Arm_PushBall = 4
-    Arm_LineUp = 5
-    Arm_LineDown = 6
-    Arm_Angle = 7
-    Arm_StopPush = 8
+    Arm_MoveTo_Tea_Upside = 9
+    Arm_LineDownTo_Tea =10
+    Arm_Catch_tea = 11
+    Arm_LineUpTo_Shake = 12
+    Arm_Move_Tea_To_Shake = 13
+    Arm_Pour = 14
+    Arm_Pour_Back = 15
+    Arm_MoveTo_Press = 16
+    Arm_MoveTo_Ice_Upside = 17
+    Arm_LineDownTo_Ice = 18
+    Arm_Move_Ice_To_Shake = 19
+    Arm_MoveTo_Cover_Upside = 20
+    Arm_LineDownTo_Cover = 21
+    Arm_MoveToShake = 22
+    Arm_LineDownTo_Shake = 23
+    Arm_ShakeTea_roll = 24
+    Arm_Gripper_Loose = 25
+    Arm_Gripper_catch = 26
+    Arm_Gripper_Home  = 27
+    
+    
 class MissionType(enum.IntEnum):
     Get_Img = 0
     PushBall = 1
@@ -226,7 +246,7 @@ class pos():
         self.z = 20
         self.pitch = -90
         self.roll = 0
-        self.yaw = 0
+        self.yaw = 0 
 class Target_pos():
     def __init__(self, x, y, z, pitch, roll, yaw):
         self.x = 0
@@ -234,7 +254,7 @@ class Target_pos():
         self.z = 20
         self.pitch = -90
         self.roll = 0
-        self.yaw = 0
+        self.yaw = 0 
 class TargetPush_pos():
     def __init__(self, x, y, z, pitch, roll, yaw):
         self.x = 0
@@ -242,80 +262,20 @@ class TargetPush_pos():
         self.z = 20
         self.pitch = -90
         self.roll = 0
-        self.yaw = 0
+        self.yaw = 0 
 class Item():
     def __init__(self,x,y,label):
         self.x = x
         self.y = y
         self.label = label
-def Billiards_Calculation():
+def Shake_identify():
     global angle_SubCue,HoleState,SpecifyBall_mid
-    # SpecifyBall=Item(SpecifyBall_mid[0],SpecifyBall_mid[1],0)#母球
-    # CueBall=Item(CueBalll_mid[0],CueBalll_mid[1],9)#子球
-    #test
-    SpecifyBall=Item(33.5,57,0)#子球
-    CueBall=Item(10.5,57,9)#母球
-    if SpecifyBall.x <= ((UpLeft_X+UpRight_X)/2) and SpecifyBall.y >= ((UpLeft_Y+DownLeft_Y)/2):
-        HoleState = 0
-        Hole_X = UpLeft_X
-        Hole_Y = UpLeft_Y
-    elif SpecifyBall.x > ((UpLeft_X+UpRight_X)/2) and SpecifyBall.y >= ((UpRight_Y+DownRight_Y)/2):
-        HoleState = 1
-        Hole_X = UpRight_X
-        Hole_Y = UpRight_Y
-    elif SpecifyBall.x <= ((DownLeft_X+DownRight_X)/2) and SpecifyBall.y < ((UpLeft_Y+DownLeft_Y)/2):
-        HoleState = 2
-        Hole_X = DownLeft_X
-        Hole_Y = DownLeft_Y
-    elif SpecifyBall.x > ((DownLeft_X+DownRight_X)/2) and SpecifyBall.y < ((UpRight_Y+DownRight_Y)/2):
-        HoleState = 3
-        Hole_X = DownRight_X
-        Hole_Y = DownLeft_Y
-    Sub_Hole_X = SpecifyBall.x - Hole_X
-    Sub_Hole_Y = SpecifyBall.y - Hole_Y
-    if Sub_Hole_X == 0:
-        angle_HoleSub = math.pi/2.0
-    else:
-        angle_HoleSub = math.atan(math.fabs(Sub_Hole_Y/Sub_Hole_X))
-    if Sub_Hole_X <0.0 and Sub_Hole_Y >= 0.0:
-        angle_HoleSub = math.pi -angle_HoleSub
-    elif Sub_Hole_X <0.0 and Sub_Hole_Y <0.0:
-        angle_HoleSub = math.pi +angle_HoleSub
-    elif Sub_Hole_X >=0.0 and Sub_Hole_Y <0.0:
-        angle_HoleSub = math.pi*2.0 -angle_HoleSub
-    angle_HoleSub = angle_HoleSub*180/math.pi
-    Ball_radius_X = 2*Ball_radius*math.cos(angle_HoleSub*math.pi/180)
-    Ball_radius_Y = 2*Ball_radius*math.sin(angle_HoleSub*math.pi/180)
-    Cub_Sub_X = CueBall.x - SpecifyBall.x + Ball_radius_X
-    Cub_Sub_Y = CueBall.y - SpecifyBall.y + Ball_radius_Y
-
-    if Cub_Sub_X ==0.0:
-        angle_SubCue = math.pi/2.0
-    else:
-        angle_SubCue = math.atan(math.fabs(Cub_Sub_Y/Cub_Sub_X))
-    if Cub_Sub_X < 0.0 and Cub_Sub_Y >= 0.0:
-        angle_SubCue = math.pi - angle_SubCue
-    elif Cub_Sub_X < 0.0 and Cub_Sub_Y < 0.0:
-        angle_SubCue = math.pi + angle_SubCue
-    elif Cub_Sub_X >=0.0 and Cub_Sub_Y < 0.0:
-        angle_SubCue = math.pi*2.0 - angle_SubCue
-    angle_SubCue = angle_SubCue*180/math.pi
-    ##球直徑3.12cm
-    Target_pos.x = CueBall.x + 7.5*Ball_radius*math.cos(angle_SubCue*math.pi/180)
-    Target_pos.y = CueBall.y + 7.5*Ball_radius*math.sin(angle_SubCue*math.pi/180)
-    TargetPush_pos.x = CueBall.x
-    TargetPush_pos.y = CueBall.y
-
-    angle_SubCue = angle_SubCue -90;#轉換手臂角度 ROLL
-	##---轉換角度從指向母球至指向子球
-    if angle_SubCue >= 180:
-    	angle_SubCue = angle_SubCue -180
-    elif angle_SubCue <= -180:
-        angle_SubCue = angle_SubCue +180
-    elif angle_SubCue >0 :
-        angle_SubCue = angle_SubCue -180
-    elif angle_SubCue <=0:
-        angle_SubCue = angle_SubCue +180
+    ###------語音辨識
+    Target_pos.x = 10
+    Target_pos.y = 10
+    TargetPush_pos.x = 10
+    TargetPush_pos.y = 50
+    angle_SubCue = 30.3
     return TargetPush_pos,Target_pos,angle_SubCue
 def Mission_Trigger():
     if GetInfoFlag == True and GetKeyFlag == False and ExecuteFlag == False:
@@ -324,19 +284,34 @@ def Mission_Trigger():
         GetKey_Mission()
     if GetInfoFlag == False and GetKeyFlag == False and ExecuteFlag == True:
         Execute_Mission()
+    
+    
 def GetInfo_Mission():
     global GetInfoFlag,GetKeyFlag,ExecuteFlag
-
-    Billiards_Calculation()
-
+    Shake_identify()
     GetInfoFlag = False
     GetKeyFlag = True
     ExecuteFlag = False
+def Image_Information():
+     ##-- yolov3 info
+    global object_name,min_xy,max_xy ,obj_num,score
+    ## for 取 50張 信心值超過70%  
+    ## 取出位置取平均
+
+    
+    print("----- object_" + str(obj_num) + " ----- ")
+    print("object_name = " + str(object_name))
+    print("score = " + str(score))
+    print("min_xy = [ " +  str(min_xy) +  " ]" )
+    print("max_xy = [ " +  str(max_xy) +  " ]" )
+
+
 
 def GetKey_Mission():
     global GetInfoFlag,GetKeyFlag,ExecuteFlag,MotionKey,MotionSerialKey
 
     Mission = Get_MissionType()
+    #MotionSerialkey = MissionItem(Mission)
     MissionItem(Mission)
     MotionSerialKey = MotionKey
     GetInfoFlag = False
@@ -355,19 +330,53 @@ def Get_MissionType():
             break
     CurrentMissionType = Type
     return Type
+
+###------------------搖飲料任務動作------
+# 1.將茶夾起
+# 2.移動到雪客杯上方
+# 3.倒入茶 轉角度roll
+# 4.鬆開夾指放置茶
+# 5.按一下 按壓瓶
+# 6.移至冰塊上方 進行夾取
+# 7.重複上述動作兩次(冰塊兩塊)
+# 8.夾取蓋子 
+# 9.搖飲料roll
+# 10.開蓋子
+
 def MissionItem(ItemNo):
     global MotionKey
     Key_PushBallCommand = [\
-        ArmMotionCommand.Arm_MoveToTargetUpside,\
-        ArmMotionCommand.Arm_LineDown,\
-        ArmMotionCommand.Arm_PushBall,\
-        ArmMotionCommand.Arm_LineUp,\
-        ArmMotionCommand.Arm_Stop,\
+        ArmMotionCommand.Arm_MoveTo_Tea_Upside,\
+        ArmMotionCommand.Arm_LineDownTo_Tea,\
+        ArmMotionCommand.Arm_Catch_tea,\
+        ArmMotionCommand.Arm_LineUpTo_Shake,\
+        ArmMotionCommand.Arm_Move_Tea_To_Shake,\
+        ArmMotionCommand.Arm_Pour,\
+        ArmMotionCommand.Arm_Pour_Back,\
+        ArmMotionCommand.Arm_MoveTo_Press,\
+        ArmMotionCommand.Arm_MoveTo_Ice_Upside,\
+        ArmMotionCommand.Arm_LineDownTo_Ice,\
+        ArmMotionCommand.Arm_Gripper_catch,\
+        ArmMotionCommand.Arm_Move_Ice_To_Shake,\
+        ArmMotionCommand.Arm_Gripper_Loose,\
+        ArmMotionCommand.Arm_Gripper_Home,\
+        ArmMotionCommand.Arm_MoveTo_Ice_Upside,\
+        ArmMotionCommand.Arm_LineDownTo_Ice,\
+        ArmMotionCommand.Arm_Gripper_catch,\
+        ArmMotionCommand.Arm_Move_Ice_To_Shake,\
+        ArmMotionCommand.Arm_Gripper_Loose,\
+        ArmMotionCommand.Arm_Gripper_Home,\
+        ArmMotionCommand.Arm_Stop
         ]
     Key_PushBackCommand = [\
-        ArmMotionCommand.Arm_MoveVision,\
+        ArmMotionCommand.Arm_MoveTo_Cover_Upside,\
+        ArmMotionCommand.Arm_LineDownTo_Cover,\
+        ArmMotionCommand.Arm_Gripper_catch,\
+        ArmMotionCommand.Arm_MoveToShake,\
+        ArmMotionCommand.Arm_LineDownTo_Shake,\
+        ArmMotionCommand.Arm_Gripper_Loose,\
+        ArmMotionCommand.Arm_ShakeTea_roll,\
         ArmMotionCommand.Arm_Stop,\
-        ArmMotionCommand.Arm_StopPush,\
         ]
     for case in switch(ItemNo): #傳送指令給socket選擇手臂動作
         if case(MissionType.PushBall):
@@ -403,91 +412,236 @@ def Execute_Mission():
         else:
             MotionItem(MotionSerialKey[MotionStep])
             MotionStep += 1
+    
 def MotionItem(ItemNo):
     global angle_SubCue,SpeedValue,PushFlag,LinePtpFlag,MissionEndFlag
-    SpeedValue = 5
+    SpeedValue = 10
     for case in switch(ItemNo): #傳送指令給socket選擇手臂動作
         if case(ArmMotionCommand.Arm_Stop):
             MoveFlag = False
             print("Arm_Stop")
             break
-        if case(ArmMotionCommand.Arm_StopPush):
-            MoveFlag = False
-            PushFlag = True #重新掃描物件
-            print("Arm_StopPush")
-            break
-        if case(ArmMotionCommand.Arm_MoveToTargetUpside):
-            pos.x = Target_pos.x
-            pos.y = Target_pos.y
-            pos.z = ObjAboveHeight
-            pos.pitch = -90
-            pos.roll = -(angle_SubCue) #RobotArm5
-            pos.yaw = 0
-            MoveFlag = True
-            LinePtpFlag = False
-            SpeedValue = 10
-            print("Arm_MoveToTargetUpside")
-            break
-        if case(ArmMotionCommand.Arm_LineUp):
-            pos.z = ObjAboveHeight
-            MoveFlag = True
-            LinePtpFlag = True
-            SpeedValue = 5
-            print("Arm_LineUp")
-            break
-        if case(ArmMotionCommand.Arm_LineDown):
-            pos.z = PushBallHeight
-            MoveFlag = True
-            LinePtpFlag = True
-            SpeedValue = 5
-            print("Arm_LineDown")
-            break
-        if case(ArmMotionCommand.Arm_PushBall):
-            pos.x = TargetPush_pos.x
-            pos.y = TargetPush_pos.y
-            pos.z = PushBallHeight
-            pos.pitch = -90
-            pos.roll = -(angle_SubCue)
-            pos.yaw = 0
-            SpeedValue = 100   ##待測試up
-            MoveFlag = True
-            LinePtpFlag = False
-            print("Arm_PushBall")
-            break
-        if case(ArmMotionCommand.Arm_MoveVision):
+        ##----------Skake Strategy------------##
+        if case(ArmMotionCommand.Arm_MoveTo_Tea_Upside):
             pos.x = 0
             pos.y = 50
-            pos.z = 20
-            pos.pitch = -90
-            pos.roll = 0
-            pos.yaw = 0
-            SpeedValue = 10
-            MoveFlag = True
-            LinePtpFlag = False
-            ##任務結束旗標
-            MissionEndFlag = True
-            print("Arm_MoveVision")
-            break
-        if case(ArmMotionCommand.Arm_MoveFowardDown):
-            pos.x = 0
-            pos.y = 50
-            pos.z = 20
+            pos.z = 30
             pos.pitch = -90
             pos.roll = 0
             pos.yaw = 0
             MoveFlag = True
             LinePtpFlag = False
-            print("Arm_MoveFowardDown")
+            print("Arm_MoveTo_Tea_Upside")
+            break
+        if case(ArmMotionCommand.Arm_LineDownTo_Tea):
+            pos.x = 0
+            pos.y = 50
+            pos.z = 30
+            pos.pitch = -90
+            pos.roll = 0
+            pos.yaw = 0
+            MoveFlag = True
+            LinePtpFlag = False
+            print("Arm_LineDownTo_Tea")
+            break
+        if case(ArmMotionCommand.Arm_Catch_tea):
+            pos.x = 0
+            pos.y = 50
+            pos.z = 30
+            pos.pitch = -90
+            pos.roll = 0
+            pos.yaw = 0
+            MoveFlag = True
+            LinePtpFlag = False
+            print("Arm_Catch_tea")
+            break
+        if case(ArmMotionCommand.Arm_LineUpTo_Shake):
+            pos.x = 0
+            pos.y = 50
+            pos.z = 30
+            pos.pitch = -90
+            pos.roll = 0
+            pos.yaw = 0
+            MoveFlag = True
+            LinePtpFlag = False
+            print("Arm_LineUpTo_Shake")
+            break
+        if case(ArmMotionCommand.Arm_Move_Tea_To_Shake):
+            pos.x = 0
+            pos.y = 50
+            pos.z = 30
+            pos.pitch = -90
+            pos.roll = 0
+            pos.yaw = 0
+            MoveFlag = True
+            LinePtpFlag = False
+            print("Arm_Move_Tea_To_Shake")
+            break
+        if case(ArmMotionCommand.Arm_Pour):
+            pos.x = 0
+            pos.y = 50
+            pos.z = 30
+            pos.pitch = -90
+            pos.roll = 0
+            pos.yaw = 0
+            MoveFlag = True
+            LinePtpFlag = False
+            print("Arm_Pour")
+            break
+        if case(ArmMotionCommand.Arm_Pour_Back):
+            pos.x = 0
+            pos.y = 50
+            pos.z = 30
+            pos.pitch = -90
+            pos.roll = 0
+            pos.yaw = 0
+            MoveFlag = True
+            LinePtpFlag = False
+            print("Arm_Pour_Back")
+            break
+        if case(ArmMotionCommand.Arm_MoveTo_Press):
+            pos.x = 0
+            pos.y = 50
+            pos.z = 30
+            pos.pitch = -90
+            pos.roll = 0
+            pos.yaw = 0
+            MoveFlag = True
+            LinePtpFlag = False
+            print("Arm_MoveTo_Press")
+            break
+        if case(ArmMotionCommand.Arm_MoveTo_Ice_Upside):
+            pos.x = 0
+            pos.y = 50
+            pos.z = 30
+            pos.pitch = -90
+            pos.roll = 0
+            pos.yaw = 0
+            MoveFlag = True
+            LinePtpFlag = False
+            print("Arm_MoveTo_Ice_Upside")
+            break
+        if case(ArmMotionCommand.Arm_LineDownTo_Ice):
+            pos.x = 0
+            pos.y = 50
+            pos.z = 30
+            pos.pitch = -90
+            pos.roll = 0
+            pos.yaw = 0
+            MoveFlag = True
+            LinePtpFlag = False
+            print("Arm_LineDownTo_Ice")
+            break
+        if case(ArmMotionCommand.Arm_Move_Ice_To_Shake):
+            pos.x = 0
+            pos.y = 50
+            pos.z = 30
+            pos.pitch = -90
+            pos.roll = 0
+            pos.yaw = 0
+            MoveFlag = True
+            LinePtpFlag = False
+            print("Arm_Move_Ice_To_Shake")
+            break
+        if case(ArmMotionCommand.Arm_MoveTo_Cover_Upside):
+            pos.x = 0
+            pos.y = 50
+            pos.z = 30
+            pos.pitch = -90
+            pos.roll = 0
+            pos.yaw = 0
+            MoveFlag = True
+            LinePtpFlag = False
+            print("Arm_MoveTo_Cover_Upside")
+            break
+        if case(ArmMotionCommand.Arm_LineDownTo_Cover):
+            pos.x = 0
+            pos.y = 50
+            pos.z = 30
+            pos.pitch = -90
+            pos.roll = 0
+            pos.yaw = 0
+            MoveFlag = True
+            LinePtpFlag = False
+            print("Arm_LineDownTo_Cover")
+            break
+        if case(ArmMotionCommand.Arm_MoveToShake):
+            pos.x = 0
+            pos.y = 50
+            pos.z = 30
+            pos.pitch = -90
+            pos.roll = 0
+            pos.yaw = 0
+            MoveFlag = True
+            LinePtpFlag = False
+            print("Arm_MoveToShake")
+            break
+        if case(ArmMotionCommand.Arm_LineDownTo_Shake):
+            pos.x = 0
+            pos.y = 50
+            pos.z = 30
+            pos.pitch = -90
+            pos.roll = 0
+            pos.yaw = 0
+            MoveFlag = True
+            LinePtpFlag = False
+            print("Arm_LineDownTo_Shake")
+            break
+        if case(ArmMotionCommand.Arm_ShakeTea_roll):
+            pos.x = 0
+            pos.y = 50
+            pos.z = 30
+            pos.pitch = -90
+            pos.roll = 0
+            pos.yaw = 0
+            MoveFlag = True
+            LinePtpFlag = False
+            print("Arm_ShakeTea_roll")
+            break
+        if case(ArmMotionCommand.Arm_Gripper_Loose):
+            pos.x = 0
+            pos.y = 50
+            pos.z = 30
+            pos.pitch = -90
+            pos.roll = 0
+            pos.yaw = 0
+            MoveFlag = True
+            LinePtpFlag = False
+            print("Arm_Gripper_Loose")
+            break
+        if case(ArmMotionCommand.Arm_Gripper_catch):
+            pos.x = 0
+            pos.y = 50
+            pos.z = 30
+            pos.pitch = -90
+            pos.roll = 0
+            pos.yaw = 0
+            MoveFlag = True
+            LinePtpFlag = False
+            print("Arm_Gripper_catch")
+            break
+        if case(ArmMotionCommand.Arm_Gripper_Home):
+            pos.x = 0
+            pos.y = 50
+            pos.z = 30
+            pos.pitch = -90
+            pos.roll = 0
+            pos.yaw = 0
+            MoveFlag = True
+            LinePtpFlag = False
+            print("Arm_Gripper_Home")
             break
         if case(): # default, could also just omit condition or 'if True'
             print ("something else!")
             # No need to break here, it'll stop anyway
     if MoveFlag == True:
         if LinePtpFlag == False:
+            SpeedValue = 10
             print('x: ',pos.x,' y: ',pos.y,' z: ',pos.z,' pitch: ',pos.pitch,' roll: ',pos.roll,' yaw: ',pos.yaw)
             strategy_client_Arm_Mode(2,1,0,SpeedValue,2)#action,ra,grip,vel,both
             strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
         elif LinePtpFlag == True:
+            SpeedValue = 10
             print('x: ',pos.x,' y: ',pos.y,' z: ',pos.z,' pitch: ',pos.pitch,' roll: ',pos.roll,' yaw: ',pos.yaw)
             strategy_client_Arm_Mode(3,1,0,SpeedValue,2)#action,ra,grip,vel,both
             strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
@@ -503,16 +657,16 @@ if __name__ == '__main__':
     argv = rospy.myargv()
     rospy.init_node('ros_socket', anonymous=True)
     strategy_server()
-
-    GetInfoFlag = True #Test no data
-    # try:
-    #     rospy.Subscriber('/object/ROI_array', ROI_array, get_obj_info_cb)
-    # except rospy.ROSInterruptException:
-    #     rospy.loginfo('error')
-    #     pass
+    #GetInfoFlag = True
+    try:
+        rospy.Subscriber('/object/ROI_array', ROI_array, get_obj_info_cb)
+    except rospy.ROSInterruptException:
+        rospy.loginfo('error')
+        pass
     while 1:
         Mission_Trigger()
+        
         if CurrentMissionType == MissionType.Mission_End:
             rospy.on_shutdown(myhook)
-            #rospy.spin()
+            break
     rospy.spin()
