@@ -117,14 +117,12 @@ def socket_client():
         sys.exit(1)
     print('Connection has been successful')
     print(s.recv(1024))
-    start_input=int(input('開始傳輸請按1,離開請按3 : ')) #輸入開始指令
+    start_input=int(input('開始傳輸請按1,離開請按3 : '))
     #start_input = 1
     if start_input==1:
         while 1:
         ##---------------socket 傳輸手臂命令-----------------
-            #-------選擇模式--------
             for case in switch(socket_cmd.action):
-                #-------PtP Mode--------
                 if case(Taskcmd.Action_Type.PtoP):
                     for case in switch(socket_cmd.setboth):
                         if case(Taskcmd.Ctrl_Mode.CTRL_POS):
@@ -137,7 +135,6 @@ def socket_client():
                             data = TCP.SetPtoP(socket_cmd.grip,Taskcmd.RA.ABS,Taskcmd.Ctrl_Mode.CTRL_BOTH,pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw,socket_cmd.setvel)
                             break
                     break
-                #-------Line Mode--------
                 if case(Taskcmd.Action_Type.Line):
                     for case in switch(socket_cmd.setboth):
                         if case(Taskcmd.Ctrl_Mode.CTRL_POS):
@@ -150,15 +147,12 @@ def socket_client():
                             data = TCP.SetLine(socket_cmd.grip,Taskcmd.RA.ABS,Taskcmd.Ctrl_Mode.CTRL_BOTH,pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw,socket_cmd.setvel )
                             break
                     break
-                #-------設定手臂速度--------
                 if case(Taskcmd.Action_Type.SetVel):
                     data = TCP.SetVel(socket_cmd.grip, socket_cmd.setvel)
                     break
-                #-------設定手臂Delay時間--------
                 if case(Taskcmd.Action_Type.Delay):
                     data = TCP.SetDelay(socket_cmd.grip,0)
                     break
-                #-------設定手臂急速&安全模式--------
                 if case(Taskcmd.Action_Type.Mode):
                     data = TCP.SetMode(socket_cmd.grip,0)
                     break

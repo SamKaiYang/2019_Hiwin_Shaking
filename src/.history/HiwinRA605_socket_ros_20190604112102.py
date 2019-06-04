@@ -117,7 +117,7 @@ def socket_client():
         sys.exit(1)
     print('Connection has been successful')
     print(s.recv(1024))
-    start_input=int(input('開始傳輸請按1,離開請按3 : ')) #輸入開始指令
+    start_input=int(input('開始傳輸請按1,離開請按3 : '))
     #start_input = 1
     if start_input==1:
         while 1:

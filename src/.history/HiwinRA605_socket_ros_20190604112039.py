@@ -117,7 +117,7 @@ def socket_client():
         sys.exit(1)
     print('Connection has been successful')
     print(s.recv(1024))
-    start_input=int(input('開始傳輸請按1,離開請按3 : ')) #輸入開始指令
+    start_input=int(input('開始傳輸請按1,離開請按3 : '))
     #start_input = 1
     if start_input==1:
         while 1:
@@ -158,7 +158,6 @@ def socket_client():
                 if case(Taskcmd.Action_Type.Delay):
                     data = TCP.SetDelay(socket_cmd.grip,0)
                     break
-                #-------設定手臂急速&安全模式--------
                 if case(Taskcmd.Action_Type.Mode):
                     data = TCP.SetMode(socket_cmd.grip,0)
                     break

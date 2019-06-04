@@ -19,7 +19,7 @@ import HiwinRA605_socket_TCPcmd as TCP
 import HiwinRA605_socket_Taskcmd as Taskcmd
 import talker as talk
 import enum
-data = '0' #設定傳輸資料初始值
+data = '0' #設定傳輸資料初始直
 Arm_feedback = 1 #假設手臂忙碌
 state_feedback = 0
 NAME = 'socket_server'
@@ -77,8 +77,9 @@ def socket_client_arm_state(Arm_state):
         print ("Service call failed: %s"%e)
 
 ##-----------client feedback arm state end----------
-##------------server 端-------
-def point_data(req): ##接收策略端傳送位姿資料
+##------------server -------
+##--------touch strategy--------###
+def point_data(req):
     global client_response
     pos.x = '%s'%req.x
     pos.y = '%s'%req.y
@@ -90,41 +91,40 @@ def point_data(req): ##接收策略端傳送位姿資料
     client_response = client_response + 1
     return(client_response)
 ##----------Arm Mode-------------###
-def Arm_Mode(req): ##接收策略端傳送手臂模式資料
+def Arm_Mode(req):
     socket_cmd.action = int('%s'%req.action)
     socket_cmd.grip = int('%s'%req.grip)
     socket_cmd.ra = int('%s'%req.ra)
     socket_cmd.setvel = int('%s'%req.vel)
     socket_cmd.setboth = int('%s'%req.both)
     return(1)
-def socket_server(): ##創建Server node
+##--------touch strategy end--------###
+def socket_server():
     rospy.init_node(NAME)
     a = rospy.Service('arm_mode',arm_mode, Arm_Mode) ##server arm mode data
     s = rospy.Service('arm_pos',arm_data, point_data) ##server arm point data
     print ("Ready to connect")
     rospy.spin() ## spin one
-##------------server 端 end-------
+##------------server end-------
 ##----------socket 封包傳輸--------------##
 ##-----------socket client--------
 def socket_client():
     global Arm_feedback,data
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(('192.168.0.1', 8080))#iclab 5 ＆ iclab hiwin
+        s.connect(('192.168.0.1', 8080))#iclab 5
         #s.connect(('192.168.1.102', 8080))#iclab computerx
     except socket.error as msg:
         print(msg)
         sys.exit(1)
     print('Connection has been successful')
     print(s.recv(1024))
-    start_input=int(input('開始傳輸請按1,離開請按3 : ')) #輸入開始指令
+    start_input=int(input('開始傳輸請按1,離開請按3 : '))
     #start_input = 1
     if start_input==1:
         while 1:
         ##---------------socket 傳輸手臂命令-----------------
-            #-------選擇模式--------
             for case in switch(socket_cmd.action):
-                #-------PtP Mode--------
                 if case(Taskcmd.Action_Type.PtoP):
                     for case in switch(socket_cmd.setboth):
                         if case(Taskcmd.Ctrl_Mode.CTRL_POS):
@@ -137,7 +137,6 @@ def socket_client():
                             data = TCP.SetPtoP(socket_cmd.grip,Taskcmd.RA.ABS,Taskcmd.Ctrl_Mode.CTRL_BOTH,pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw,socket_cmd.setvel)
                             break
                     break
-                #-------Line Mode--------
                 if case(Taskcmd.Action_Type.Line):
                     for case in switch(socket_cmd.setboth):
                         if case(Taskcmd.Ctrl_Mode.CTRL_POS):
@@ -150,35 +149,34 @@ def socket_client():
                             data = TCP.SetLine(socket_cmd.grip,Taskcmd.RA.ABS,Taskcmd.Ctrl_Mode.CTRL_BOTH,pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw,socket_cmd.setvel )
                             break
                     break
-                #-------設定手臂速度--------
                 if case(Taskcmd.Action_Type.SetVel):
                     data = TCP.SetVel(socket_cmd.grip, socket_cmd.setvel)
                     break
-                #-------設定手臂Delay時間--------
                 if case(Taskcmd.Action_Type.Delay):
                     data = TCP.SetDelay(socket_cmd.grip,0)
                     break
-                #-------設定手臂急速&安全模式--------
                 if case(Taskcmd.Action_Type.Mode):
                     data = TCP.SetMode(socket_cmd.grip,0)
                     break
-            socket_cmd.action= 5 ##切換初始mode狀態
+            socket_cmd.action= 5
             s.send(data.encode('utf-8'))#socket傳送for python to translate str
             feedback_str = s.recv(1024)
             #手臂端傳送手臂狀態
-            if str(feedback_str[2]) == '70':# F 手臂為Ready狀態準備接收下一個運動指令
+            ###test 0403
+            if str(feedback_str[2]) == '70':# F
                 feedback = 0
                 socket_client_arm_state(feedback)
                 print("isbusy false")
-            if str(feedback_str[2]) == '84':# T 手臂為忙碌狀態無法執行下一個運動指令
+            if str(feedback_str[2]) == '84':# T
                 feedback = 1
                 socket_client_arm_state(feedback)
                 print("isbusy true")
-            if str(feedback_str[2]) == '54':# 6 策略完成
+            if str(feedback_str[2]) == '54':# 6
                 feedback = 6
                 socket_client_arm_state(feedback)
                 print("shutdown")
             #Arm_feedback = TCP.Is_busy(feedback)
+            ###test 0403
         ##---------------socket 傳輸手臂命令 end-----------------
             if Arm_feedback == Taskcmd.Arm_feedback_Type.shutdown:
                 rospy.on_shutdown(myhook)
@@ -195,9 +193,9 @@ def thread_test():
 def myhook():
     print ("shutdown time!")
 if __name__ == '__main__':
-    socket_cmd.action = 5##切換初始mode狀態
+    socket_cmd.action = 5
     t = threading.Thread(target=thread_test)
-    t.start() # 開啟多執行緒
+    t.start()
     socket_server()
     t.join()
 
