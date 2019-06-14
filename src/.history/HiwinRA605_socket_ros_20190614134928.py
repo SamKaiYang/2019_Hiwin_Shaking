@@ -165,7 +165,7 @@ def socket_client():
                     break
                 #-------設定手臂急速&安全模式--------
                 if case(Taskcmd.Action_Type.Mode):
-                    data = TCP.Set_SpeedMode(socket_cmd.grip,socket_cmd.Speedmode)
+                    data = TCP.SetMode(socket_cmd.grip,socket_cmd.Speedmode)
                     break
             socket_cmd.action= 5 ##切換初始mode狀態
             s.send(data.encode('utf-8'))#socket傳送for python to translate str

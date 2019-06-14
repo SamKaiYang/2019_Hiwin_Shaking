@@ -63,6 +63,7 @@ add_service_files(
    arm_data.srv
    arm_mode.srv
    arm_state.srv
+   speed_mode.srv
  )
 
 ## Generate actions in the 'action' folder

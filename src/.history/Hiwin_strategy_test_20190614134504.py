@@ -116,7 +116,7 @@ def strategy_client_Speed_Mode(Speedmode):
         # create a handle to the add_two_ints service
         Speed_mode_client = rospy.ServiceProxy('speed_mode', speed_mode)
         speed_mode_feedback = Speed_mode_client(Speedmode)
-        speed_mode_feedback_times = speed_mode_feedback.feedback
+        speed_mode_feedback_times = speed_mode_feedback.mode
         return speed_mode_feedback_times
     except rospy.ServiceException as e:
         print ("Service call failed: %s"%e)

@@ -35,14 +35,14 @@ class pos():
         self.yaw = yaw
 ##------------class socket_cmd---------
 class socket_cmd():
-    def __init__(self, grip, setvel, ra, delay, setboth, action,Speedmode):
+    def __init__(self, grip, setvel, ra, delay, setboth, action,Speed_Mode):
         self.grip = grip
         self.setvel = setvel
         self.ra = ra
         self.delay = delay
         self.setboth = setboth
         self.action = action
-        self.Speedmode = Speedmode
+        self.Speed_Mode = Speed_Mode
 ##-----------switch define------------##
 class switch(object):
     def __init__(self, value):
@@ -98,14 +98,11 @@ def Arm_Mode(req): ##接收策略端傳送手臂模式資料
     socket_cmd.setboth = int('%s'%req.both)
     return(1)
 ##-------Arm Speed Mode------------###
-def Speed_Mode(req): ##接收策略端傳送手臂模式資料
-    socket_cmd.Speedmode = int('%s'%req.Speedmode)
-    return(1)
 def socket_server(): ##創建Server node
     rospy.init_node(NAME)
     a = rospy.Service('arm_mode',arm_mode, Arm_Mode) ##server arm mode data
     s = rospy.Service('arm_pos',arm_data, point_data) ##server arm point data
-    b = rospy.Service('speed_mode',speed_mode, Speed_Mode) ##server speed mode data
+    b = rospy.Service('arm_pos',arm_data, point_data) ##server arm point data
     print ("Ready to connect")
     rospy.spin() ## spin one
 ##------------server 端 end-------
@@ -165,7 +162,7 @@ def socket_client():
                     break
                 #-------設定手臂急速&安全模式--------
                 if case(Taskcmd.Action_Type.Mode):
-                    data = TCP.Set_SpeedMode(socket_cmd.grip,socket_cmd.Speedmode)
+                    data = TCP.SetMode(socket_cmd.grip,0)
                     break
             socket_cmd.action= 5 ##切換初始mode狀態
             s.send(data.encode('utf-8'))#socket傳送for python to translate str

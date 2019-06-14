@@ -111,12 +111,12 @@ def strategy_client_Arm_Mode(action,ra,grip,vel,both):
 def strategy_client_Speed_Mode(Speedmode):
     global speed_mode_feedback_times
 
-    rospy.wait_for_service('speed_mode')
+    rospy.wait_for_service('arm_speed_mode')
     try:
         # create a handle to the add_two_ints service
-        Speed_mode_client = rospy.ServiceProxy('speed_mode', speed_mode)
+        Speed_mode_client = rospy.ServiceProxy('arm_speed_mode', speed_mode)
         speed_mode_feedback = Speed_mode_client(Speedmode)
-        speed_mode_feedback_times = speed_mode_feedback.feedback
+        speed_mode_feedback_times = speed_mode_feedback.mode
         return speed_mode_feedback_times
     except rospy.ServiceException as e:
         print ("Service call failed: %s"%e)

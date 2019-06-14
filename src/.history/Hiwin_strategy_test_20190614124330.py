@@ -107,19 +107,6 @@ def strategy_client_Arm_Mode(action,ra,grip,vel,both):
         return mode_feedback_times
     except rospy.ServiceException as e:
         print ("Service call failed: %s"%e)
-##---------strategy_client Speed mode data
-def strategy_client_Speed_Mode(Speedmode):
-    global speed_mode_feedback_times
-
-    rospy.wait_for_service('speed_mode')
-    try:
-        # create a handle to the add_two_ints service
-        Speed_mode_client = rospy.ServiceProxy('speed_mode', speed_mode)
-        speed_mode_feedback = Speed_mode_client(Speedmode)
-        speed_mode_feedback_times = speed_mode_feedback.feedback
-        return speed_mode_feedback_times
-    except rospy.ServiceException as e:
-        print ("Service call failed: %s"%e)
 ##------------client end-------
 ##------------class-------
 class point():
@@ -364,13 +351,13 @@ def MotionItem(ItemNo):
         if LinePtpFlag == False:
             print('x: ',pos.x,' y: ',pos.y,' z: ',pos.z,' pitch: ',pos.pitch,' roll: ',pos.roll,' yaw: ',pos.yaw)
             #strategy_client_Arm_Mode(0,1,0,30,2)#action,ra,grip,vel,both
-            strategy_client_Arm_Mode(2,1,0,SpeedValue,2)#action,ra,grip,vel,both
-            strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
+            strategy_client_Arm_Mode(4,1,0,SpeedValue,2)#action,ra,grip,vel,both
+            #strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
         elif LinePtpFlag == True:
             #strategy_client_Arm_Mode(0,1,0,40,2)#action,ra,grip,vel,both
             print('x: ',pos.x,' y: ',pos.y,' z: ',pos.z,' pitch: ',pos.pitch,' roll: ',pos.roll,' yaw: ',pos.yaw)
-            strategy_client_Arm_Mode(3,1,0,SpeedValue,2)#action,ra,grip,vel,both
-            strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
+            strategy_client_Arm_Mode(4,1,0,SpeedValue,2)#action,ra,grip,vel,both
+            #strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
     #action: ptp line
     #ra : abs rel
     #grip 夾爪
