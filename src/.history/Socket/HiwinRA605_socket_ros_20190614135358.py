@@ -122,8 +122,8 @@ def socket_client():
         sys.exit(1)
     print('Connection has been successful')
     print(s.recv(1024))
-    #start_input=int(input('開始傳輸請按1,離開請按3 : ')) #輸入開始指令
-    start_input = 1
+    start_input=int(input('開始傳輸請按1,離開請按3 : ')) #輸入開始指令
+    #start_input = 1
     if start_input==1:
         while 1:
         ##---------------socket 傳輸手臂命令-----------------
@@ -174,11 +174,11 @@ def socket_client():
             if str(feedback_str[2]) == '70':# F 手臂為Ready狀態準備接收下一個運動指令
                 feedback = 0
                 socket_client_arm_state(feedback)
-                #print("isbusy false")
+                print("isbusy false")
             if str(feedback_str[2]) == '84':# T 手臂為忙碌狀態無法執行下一個運動指令
                 feedback = 1
                 socket_client_arm_state(feedback)
-                #print("isbusy true")
+                print("isbusy true")
             if str(feedback_str[2]) == '54':# 6 策略完成
                 feedback = 6
                 socket_client_arm_state(feedback)
