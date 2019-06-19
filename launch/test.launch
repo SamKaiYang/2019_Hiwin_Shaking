@@ -2,8 +2,8 @@
 
     <node name="ros_socket" pkg="ROS_Socket" type="HiwinRA605_socket_ros.py" output="screen"/>
 
-    <node name="arm_ros" pkg="ROS_Socket" type="Hiwin_RT605_ROS.py" output="screen"/>
+    <node name="arm_ros" pkg="ROS_Socket" type="Hiwin_RT605_Arm_Command.py" output="screen"/>
 
-    <node name="ros_strategy" pkg="ROS_Socket" type="HiwinRT605_test.py" output="screen"/>
+    <node name="ros_strategy" pkg="ROS_Socket" type="HiwinRT605_Strategy_test.py" output="screen"/>
 
 </launch>

@@ -9,15 +9,33 @@ from ROS_Socket.srv import *
 from ROS_Socket.msg import *
 import math
 import enum
-import Hiwin_RT605_ROS as strategy
-
-pos_feedback_times = 0
-mode_feedback_times = 0
-msg_feedback = 1
-#Arm_state_flag = 0
-#strategy_flag = 0
-arm_move_times = 1
-
+import Hiwin_RT605_Arm_Command as ArmTask
+##----Arm state-----------
+Arm_state_flag = 0
+Strategy_flag = 0
+##----Arm status enum
+class Arm_status(enum.IntEnum):
+    Idle = 0
+    Isbusy = 1
+    Error = 2
+    shutdown = 6
+##-----------server feedback arm state----------
+def Arm_state(req):
+    global CurrentMissionType,Strategy_flag,Arm_state_flag
+    Arm_state_flag = int('%s'%req.Arm_state)
+    if Arm_state_flag  == Arm_status.Isbusy: #表示手臂忙碌
+        Strategy_flag = False
+        return(1)
+    if Arm_state_flag  == Arm_status.Idle: #表示手臂準備
+        Strategy_flag = True
+        return(0)
+    if Arm_state_flag  == Arm_status.shutdown: #表示程式中斷
+        Strategy_flag= 6
+        return(6)
+def arm_state_server():
+    #rospy.init_node(NAME)
+    s = rospy.Service('arm_state',arm_state, Arm_state) ##server arm state
+    #rospy.spin() ## spin one
 ##-----------switch define------------##
 class switch(object):
     def __init__(self, value):
@@ -48,6 +66,8 @@ class point():
         self.pitch = pitch
         self.roll = roll
         self.yaw = yaw
+
+
 
 ##-------------------------strategy---------------------
 ##-----Mission 參數
@@ -173,9 +193,9 @@ def MissionItem(ItemNo):
             break
     return MotionKey
 def Execute_Mission():
-    global GetInfoFlag,GetKeyFlag,ExecuteFlag,MotionKey,MotionStep,MotionSerialKey,MissionEndFlag,CurrentMissionType
-    if strategy.state_flag.Arm == 0 and strategy.state_flag.Strategy == 1:
-        strategy.state_flag.Strategy = 0
+    global GetInfoFlag,GetKeyFlag,ExecuteFlag,MotionKey,MotionStep,MotionSerialKey,MissionEndFlag,CurrentMissionType,Strategy_flag,Arm_state_flag
+    if Arm_state_flag == Arm_status.Idle and Strategy_flag == 1:
+        Strategy_flag = 0
         if MotionKey[MotionStep] == ArmMotionCommand.Arm_Stop:
             if MissionEndFlag == True:
                 CurrentMissionType = MissionType.Mission_End
@@ -280,13 +300,13 @@ def MotionItem(ItemNo):
         if LinePtpFlag == False:
             print('x: ',pos.x,' y: ',pos.y,' z: ',pos.z,' pitch: ',pos.pitch,' roll: ',pos.roll,' yaw: ',pos.yaw)
             #strategy_client_Arm_Mode(0,1,0,30,2)#action,ra,grip,vel,both
-            strategy.strategy_client_Arm_Mode(2,1,0,SpeedValue,2)#action,ra,grip,vel,both
-            strategy.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
+            ArmTask.strategy_client_Arm_Mode(2,1,0,SpeedValue,2)#action,ra,grip,vel,both
+            ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
         elif LinePtpFlag == True:
             #strategy_client_Arm_Mode(0,1,0,40,2)#action,ra,grip,vel,both
             print('x: ',pos.x,' y: ',pos.y,' z: ',pos.z,' pitch: ',pos.pitch,' roll: ',pos.roll,' yaw: ',pos.yaw)
-            strategy.strategy_client_Arm_Mode(3,1,0,SpeedValue,2)#action,ra,grip,vel,both
-            strategy.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
+            ArmTask.strategy_client_Arm_Mode(3,1,0,SpeedValue,2)#action,ra,grip,vel,both
+            ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
     #action: ptp line
     #ra : abs rel
     #grip 夾爪
@@ -299,10 +319,11 @@ if __name__ == '__main__':
     argv = rospy.myargv()
     rospy.init_node('strategy', anonymous=True)
     GetInfoFlag = True #Test no data
-    strategy.strategy_client_Arm_Mode(0,1,0,20,2)#action,ra,grip,vel,both
+    arm_state_server()
+    ArmTask.strategy_client_Arm_Mode(0,1,0,20,2)#action,ra,grip,vel,both
     while 1:
         Mission_Trigger()
         if CurrentMissionType == MissionType.Mission_End:
-            strategy.rospy.on_shutdown(myhook)
-            strategy.rospy.spin()
+            ArmTask.rospy.on_shutdown(myhook)
+            ArmTask.rospy.spin()
     rospy.spin()

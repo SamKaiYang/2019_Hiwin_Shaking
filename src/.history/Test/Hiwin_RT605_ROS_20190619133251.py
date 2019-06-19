@@ -14,17 +14,6 @@ NAME = 'strategy_server'
 pos_feedback_times = 0
 mode_feedback_times = 0
 msg_feedback = 1
-Arm_state_flag = 0
-strategy_flag = 0
-arm_move_times = 1
-
-class State_Flag():
-    def __init__(self,Arm,Strategy):
-        self.Arm = Arm
-        self.Strategy = Strategy
-    def feedback(self):
-        return self.Arm,self.Strategy
-
 ## ------------enum action flag ------#
 class msg_feedback_Type(enum.IntEnum):
     Idle = 0
@@ -57,31 +46,7 @@ class switch(object):
             return True
         else:
             return False
-class state_flag():
-    def __init__(self,Arm,Strategy):
-        self.Arm = Arm
-        self.Strategy = Strategy
-    def feedback(self):
-        return self.Arm,self.Strategy
-##-----------server feedback arm state----------
-def Arm_state(req):
-    global CurrentMissionType
-    state_flag.Arm = int('%s'%req.Arm_state)
-    if state_flag.Arm  == 1: #表示手臂忙碌
-        state_flag.Strategy = 0
-        return(1)
-    if state_flag.Arm  == 0: #表示手臂閒置
-        state_flag.Strategy = 1
-        return(0)
-    if state_flag.Arm  == 6: #表示程式中斷
-        state_flag.Strategy = 6
-        return(6)
-def strategy_server():
-    #rospy.init_node(NAME)
-    s = rospy.Service('arm_state',arm_state, Arm_state) ##server arm point data
-    #rospy.spin() #spinone
 
-##-----------server feedback arm state end----------
 #---------strategy_client pos data------------------
 def strategy_client_pos_move(x,y,z,pitch,roll,yaw):
     global pos_feedback_times
