@@ -100,7 +100,7 @@ def Arm_Mode(req): ##接收策略端傳送手臂模式資料
 def Speed_Mode(req): ##接收策略端傳送手臂模式資料
     socket_cmd.Speedmode = int('%s'%req.Speedmode)
     return(1)
-def Grip_Mode(req): ##接收策略端傳送夾爪動作資料
+def Grip_Mode(req): ##接收策略端傳送手臂模式資料
     socket_cmd.grip = int('%s'%req.grip)
     return(1)
 def socket_server(): ##創建Server node

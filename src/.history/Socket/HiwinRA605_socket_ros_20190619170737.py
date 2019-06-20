@@ -92,6 +92,7 @@ def point_data(req): ##接收策略端傳送位姿資料
 ##----------Arm Mode-------------###
 def Arm_Mode(req): ##接收策略端傳送手臂模式資料
     socket_cmd.action = int('%s'%req.action)
+    socket_cmd.grip = int('%s'%req.grip)
     socket_cmd.ra = int('%s'%req.ra)
     socket_cmd.setvel = int('%s'%req.vel)
     socket_cmd.setboth = int('%s'%req.both)
@@ -100,7 +101,7 @@ def Arm_Mode(req): ##接收策略端傳送手臂模式資料
 def Speed_Mode(req): ##接收策略端傳送手臂模式資料
     socket_cmd.Speedmode = int('%s'%req.Speedmode)
     return(1)
-def Grip_Mode(req): ##接收策略端傳送夾爪動作資料
+def Grip_Mode(req): ##接收策略端傳送手臂模式資料
     socket_cmd.grip = int('%s'%req.grip)
     return(1)
 def socket_server(): ##創建Server node

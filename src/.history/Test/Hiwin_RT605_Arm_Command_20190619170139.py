@@ -8,6 +8,7 @@ from ROS_Socket.srv import *
 from ROS_Socket.msg import *
 import math
 import enum
+
 pos_feedback_times = 0
 mode_feedback_times = 0
 msg_feedback = 1
@@ -49,14 +50,14 @@ def strategy_client_pos_move(x,y,z,pitch,roll,yaw):
 def usage():
      return "%s [x y]"%sys.argv[0]
 ##---------strategy_client mode data  20190315
-def strategy_client_Arm_Mode(action,ra,vel,both):
+def strategy_client_Arm_Mode(action,ra,grip,vel,both):
     global mode_feedback_times
 
     rospy.wait_for_service('arm_mode')
     try:
         # create a handle to the add_two_ints service
         Arm_mode_client = rospy.ServiceProxy('arm_mode', arm_mode)
-        mode_feedback = Arm_mode_client(ra,action,vel,both)
+        mode_feedback = Arm_mode_client(grip,ra,action,vel,both)
         mode_feedback_times = mode_feedback.mode
         return mode_feedback_times
     except rospy.ServiceException as e:

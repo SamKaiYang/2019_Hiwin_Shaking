@@ -8,6 +8,7 @@ from ROS_Socket.srv import *
 from ROS_Socket.msg import *
 import math
 import enum
+
 pos_feedback_times = 0
 mode_feedback_times = 0
 msg_feedback = 1
@@ -81,7 +82,7 @@ def strategy_client_grip_Mode(grip):
     rospy.wait_for_service('grip_mode')
     try:
         # create a handle to the add_two_ints service
-        grip_mode_client = rospy.ServiceProxy('grip_mode', grip_mode)
+        grip_mode_client = rospy.ServiceProxy('grip_mode', Grip_mode)
         grip_mode_feedback = grip_mode_client(grip)
         grip_mode_feedback_times = grip_mode_feedback.feedback
         return grip_mode_feedback_times
