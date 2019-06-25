@@ -301,20 +301,20 @@ def MotionItem(ItemNo):
             print('x: ',pos.x,' y: ',pos.y,' z: ',pos.z,' pitch: ',pos.pitch,' roll: ',pos.roll,' yaw: ',pos.yaw)
             #strategy_client_Arm_Mode(0,1,0,30,2)#action,ra,grip,vel,both
 
-            # ArmTask.strategy_client_Speed_Mode(1)
-            # ArmTask.strategy_client_Arm_Mode(4,1,0,SpeedValue,2)
+            ArmTask.strategy_client_Speed_Mode(0)
+            ArmTask.strategy_client_Arm_Mode(4,1,0,SpeedValue,2)
 
-            ArmTask.strategy_client_Arm_Mode(2,1,0,SpeedValue,2)#action,ra,grip,vel,both
-            ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
+            #ArmTask.strategy_client_Arm_Mode(2,1,0,SpeedValue,2)#action,ra,grip,vel,both
+            #ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
         elif LinePtpFlag == True:
             #strategy_client_Arm_Mode(0,1,0,40,2)#action,ra,grip,vel,both
             print('x: ',pos.x,' y: ',pos.y,' z: ',pos.z,' pitch: ',pos.pitch,' roll: ',pos.roll,' yaw: ',pos.yaw)
 
-            # ArmTask.strategy_client_Speed_Mode(0)
-            # ArmTask.strategy_client_Arm_Mode(4,1,0,SpeedValue,2)
+            ArmTask.strategy_client_Speed_Mode(0)
+            ArmTask.strategy_client_Arm_Mode(4,1,0,SpeedValue,2)
 
-            ArmTask.strategy_client_Arm_Mode(3,1,0,SpeedValue,2)#action,ra,grip,vel,both
-            ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
+            #ArmTask.strategy_client_Arm_Mode(3,1,0,SpeedValue,2)#action,ra,grip,vel,both
+            #ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
     #action: ptp line
     #ra : abs rel
     #grip 夾爪
