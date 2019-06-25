@@ -75,18 +75,18 @@ def strategy_client_Speed_Mode(Speedmode):
     except rospy.ServiceException as e:
         print ("Service call failed: %s"%e)
 ##---------strategy_client grip mode data
-# def strategy_client_grip_Mode(grip):
-#     global grip_mode_feedback_times
+def strategy_client_grip_Mode(grip):
+    global grip_mode_feedback_times
 
-#     rospy.wait_for_service('grip_mode')
-#     try:
-#         # create a handle to the add_two_ints service
-#         grip_mode_client = rospy.ServiceProxy('grip_mode', grip_mode)
-#         grip_mode_feedback = grip_mode_client(grip)
-#         grip_mode_feedback_times = grip_mode_feedback.feedback
-#         return grip_mode_feedback_times
-#     except rospy.ServiceException as e:
-#         print ("Service call failed: %s"%e)
+    rospy.wait_for_service('grip_mode')
+    try:
+        # create a handle to the add_two_ints service
+        grip_mode_client = rospy.ServiceProxy('grip_mode', grip_mode)
+        grip_mode_feedback = grip_mode_client(grip)
+        grip_mode_feedback_times = grip_mode_feedback.feedback
+        return grip_mode_feedback_times
+    except rospy.ServiceException as e:
+        print ("Service call failed: %s"%e)
 ##------------client end-------
 ##------------class-------
 class point():

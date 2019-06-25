@@ -1,5 +1,6 @@
 int32 ra
 int32 action
+int32 grip
 int32 vel
 int32 both
 ---
