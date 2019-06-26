@@ -175,7 +175,7 @@ if __name__ == '__main__':
         #timer = threading.Timer(1, Mission_Trigger)
         #timer.start()
         while 1:
-            time.sleep(0.3)
+            time.sleep(0.1)
             Mission_Trigger()
     if start_input == 3:
         pass
