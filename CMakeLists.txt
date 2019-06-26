@@ -65,6 +65,7 @@ add_service_files(
    arm_state.srv
    speed_mode.srv
    grip_mode.srv
+   sent_flag.srv
  )
 
 ## Generate actions in the 'action' folder
