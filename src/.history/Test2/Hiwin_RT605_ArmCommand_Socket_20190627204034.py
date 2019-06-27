@@ -18,7 +18,7 @@ from std_msgs.msg import Int32MultiArray
 import math
 import enum
 #Socket = 0
-#data = '0' #設定傳輸資料初始值
+data = '0' #設定傳輸資料初始值
 Arm_feedback = 1 #假設手臂忙碌
 NAME = 'socket_server'
 arm_mode_flag = False
@@ -128,54 +128,56 @@ def socket_talker(): ##創建Server node
 ##----------socket 封包傳輸--------------##
  ##---------------socket 傳輸手臂命令-----------------
 def Socket_command():
-    global Socket
-    for case in switch(socket_cmd.action):
-        #-------PtP Mode--------
-        if case(Taskcmd.Action_Type.PtoP):
-            for case in switch(socket_cmd.setboth):
-                if case(Taskcmd.Ctrl_Mode.CTRL_POS):
-                    data = TCP.SetPtoP(socket_cmd.grip,Taskcmd.RA.ABS,Taskcmd.Ctrl_Mode.CTRL_POS,pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw,socket_cmd.setvel)
-                    break
-                if case(Taskcmd.Ctrl_Mode.CTRL_EULER):
-                    data = TCP.SetPtoP(socket_cmd.grip,Taskcmd.RA.ABS,Taskcmd.Ctrl_Mode.CTRL_EULER,pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw,socket_cmd.setvel)
-                    break
-                if case(Taskcmd.Ctrl_Mode.CTRL_BOTH):
-                    data = TCP.SetPtoP(socket_cmd.grip,Taskcmd.RA.ABS,Taskcmd.Ctrl_Mode.CTRL_BOTH,pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw,socket_cmd.setvel)
-                    break
-            break
-        #-------Line Mode--------
-        if case(Taskcmd.Action_Type.Line):
-            for case in switch(socket_cmd.setboth):
-                if case(Taskcmd.Ctrl_Mode.CTRL_POS):
-                    data = TCP.SetLine(socket_cmd.grip,Taskcmd.RA.ABS,Taskcmd.Ctrl_Mode.CTRL_POS,pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw,socket_cmd.setvel)
-                    break
-                if case(Taskcmd.Ctrl_Mode.CTRL_EULER):
-                    data = TCP.SetLine(socket_cmd.grip,Taskcmd.RA.ABS,Taskcmd.Ctrl_Mode.CTRL_EULER,pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw,socket_cmd.setvel )
-                    break
-                if case(Taskcmd.Ctrl_Mode.CTRL_BOTH):
-                    data = TCP.SetLine(socket_cmd.grip,Taskcmd.RA.ABS,Taskcmd.Ctrl_Mode.CTRL_BOTH,pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw,socket_cmd.setvel )
-                    break
-            break
-        #-------設定手臂速度--------
-        if case(Taskcmd.Action_Type.SetVel):
-            data = TCP.SetVel(socket_cmd.grip, socket_cmd.setvel)
-            break
-        #-------設定手臂Delay時間--------
-        if case(Taskcmd.Action_Type.Delay):
-            data = TCP.SetDelay(socket_cmd.grip,0)
-            break
-        #-------設定手臂急速&安全模式--------
-        if case(Taskcmd.Action_Type.Mode):
-            data = TCP.Set_SpeedMode(socket_cmd.grip,socket_cmd.Speedmode)
-            break
-    socket_cmd.action= 6 ##切換初始mode狀態
-    print(data)
-    print("Socket:", Socket)
-    #Socket.send(data.encode('utf-8'))#socket傳送for python to translate str
-    Socket.send(data)
+    global arm_mode_flag,data
+    if arm_mode_flag ==  True:
+        arm_mode_flag = False
+        for case in switch(socket_cmd.action):
+            #-------PtP Mode--------
+            if case(Taskcmd.Action_Type.PtoP):
+                for case in switch(socket_cmd.setboth):
+                    if case(Taskcmd.Ctrl_Mode.CTRL_POS):
+                        data = TCP.SetPtoP(socket_cmd.grip,Taskcmd.RA.ABS,Taskcmd.Ctrl_Mode.CTRL_POS,pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw,socket_cmd.setvel)
+                        break
+                    if case(Taskcmd.Ctrl_Mode.CTRL_EULER):
+                        data = TCP.SetPtoP(socket_cmd.grip,Taskcmd.RA.ABS,Taskcmd.Ctrl_Mode.CTRL_EULER,pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw,socket_cmd.setvel)
+                        break
+                    if case(Taskcmd.Ctrl_Mode.CTRL_BOTH):
+                        data = TCP.SetPtoP(socket_cmd.grip,Taskcmd.RA.ABS,Taskcmd.Ctrl_Mode.CTRL_BOTH,pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw,socket_cmd.setvel)
+                        break
+                break
+            #-------Line Mode--------
+            if case(Taskcmd.Action_Type.Line):
+                for case in switch(socket_cmd.setboth):
+                    if case(Taskcmd.Ctrl_Mode.CTRL_POS):
+                        data = TCP.SetLine(socket_cmd.grip,Taskcmd.RA.ABS,Taskcmd.Ctrl_Mode.CTRL_POS,pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw,socket_cmd.setvel)
+                        break
+                    if case(Taskcmd.Ctrl_Mode.CTRL_EULER):
+                        data = TCP.SetLine(socket_cmd.grip,Taskcmd.RA.ABS,Taskcmd.Ctrl_Mode.CTRL_EULER,pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw,socket_cmd.setvel )
+                        break
+                    if case(Taskcmd.Ctrl_Mode.CTRL_BOTH):
+                        data = TCP.SetLine(socket_cmd.grip,Taskcmd.RA.ABS,Taskcmd.Ctrl_Mode.CTRL_BOTH,pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw,socket_cmd.setvel )
+                        break
+                break
+            #-------設定手臂速度--------
+            if case(Taskcmd.Action_Type.SetVel):
+                data = TCP.SetVel(socket_cmd.grip, socket_cmd.setvel)
+                break
+            #-------設定手臂Delay時間--------
+            if case(Taskcmd.Action_Type.Delay):
+                data = TCP.SetDelay(socket_cmd.grip,0)
+                break
+            #-------設定手臂急速&安全模式--------
+            if case(Taskcmd.Action_Type.Mode):
+                data = TCP.Set_SpeedMode(socket_cmd.grip,socket_cmd.Speedmode)
+                break
+        socket_cmd.action= 6 ##切換初始mode狀態
+        print(data)
+        print("Socket:", Socket)
+        #Socket.send(data.encode('utf-8'))#socket傳送for python to translate str
+        Socket.send(data)
 ##-----------socket client--------
 def socket_client():
-    global Socket
+    #global Socket
     try:
         #Socket = client()
         Socket.get_connect()

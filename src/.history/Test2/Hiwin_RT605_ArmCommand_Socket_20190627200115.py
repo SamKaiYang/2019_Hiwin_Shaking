@@ -18,7 +18,7 @@ from std_msgs.msg import Int32MultiArray
 import math
 import enum
 #Socket = 0
-#data = '0' #設定傳輸資料初始值
+data = '0' #設定傳輸資料初始值
 Arm_feedback = 1 #假設手臂忙碌
 NAME = 'socket_server'
 arm_mode_flag = False
@@ -90,7 +90,7 @@ class client():
     def close(self):
         self.s.close()
 
-Socket = client()
+#Socket = client()
 
 def point_data(x,y,z,pitch,roll,yaw): ##接收策略端傳送位姿資料
     pos.x = x
@@ -108,7 +108,7 @@ def Arm_Mode(action,grip,ra,setvel,setboth): ##接收策略端傳送手臂模式
     socket_cmd.setvel = setvel
     socket_cmd.setboth = setboth
     arm_mode_flag = True
-    Socket_command()
+    #Socket_command()
 ##-------Arm Speed Mode------------###
 def Speed_Mode(speedmode): ##接收策略端傳送手臂模式資料
     socket_cmd.Speedmode = speedmode
@@ -127,8 +127,10 @@ def socket_talker(): ##創建Server node
 
 ##----------socket 封包傳輸--------------##
  ##---------------socket 傳輸手臂命令-----------------
-def Socket_command():
-    global Socket
+def Socket_command(s):
+    global arm_mode_flag,data
+    # if arm_mode_flag ==  True:
+    #     arm_mode_flag = False
     for case in switch(socket_cmd.action):
         #-------PtP Mode--------
         if case(Taskcmd.Action_Type.PtoP):
@@ -170,14 +172,14 @@ def Socket_command():
             break
     socket_cmd.action= 6 ##切換初始mode狀態
     print(data)
-    print("Socket:", Socket)
+    print("Socket:", s)
     #Socket.send(data.encode('utf-8'))#socket傳送for python to translate str
-    Socket.send(data)
+    s.send(data)
 ##-----------socket client--------
 def socket_client():
-    global Socket
+    #global Socket
     try:
-        #Socket = client()
+        Socket = client()
         Socket.get_connect()
         #Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         #Socket.connect(('192.168.0.1', 8080))#iclab 5 ＆ iclab hiwin
@@ -188,10 +190,11 @@ def socket_client():
         print(msg)
         sys.exit(1)
     #print('Connection has been successful')
+    print(Socket.get_recieve())
+
     Socket_feedback(Socket)
     rospy.on_shutdown(myhook)
     Socket.close()
-
 def Socket_feedback(s):
     Socket = s
     while 1:
@@ -217,7 +220,6 @@ def Socket_feedback(s):
 
 def myhook():
     print ("shutdown time!")
-
 if __name__ == '__main__':
     socket_cmd.action = 6##切換初始mode狀態
     ## 多執行緒

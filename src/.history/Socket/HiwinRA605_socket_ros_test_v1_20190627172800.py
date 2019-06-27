@@ -39,7 +39,7 @@ class point():
         self.yaw = yaw
 pos = point(0,36.8,11.35,-90,0,0)
 ##------------class socket_cmd---------
-class socket_cmd():
+class socketcmd():
     def __init__(self, grip, setvel, ra, delay, setboth, action,Speedmode):
         self.grip = grip
         self.setvel = setvel
@@ -48,6 +48,7 @@ class socket_cmd():
         self.setboth = setboth
         self.action = action
         self.Speedmode = Speedmode
+socket_cmd = socketcmd(0,0,0,0,0,0,0)
 ##-----------switch define------------##
 class switch(object):
     def __init__(self, value):

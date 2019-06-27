@@ -18,7 +18,7 @@ from std_msgs.msg import Int32MultiArray
 import math
 import enum
 #Socket = 0
-#data = '0' #設定傳輸資料初始值
+data = '0' #設定傳輸資料初始值
 Arm_feedback = 1 #假設手臂忙碌
 NAME = 'socket_server'
 arm_mode_flag = False
@@ -128,7 +128,9 @@ def socket_talker(): ##創建Server node
 ##----------socket 封包傳輸--------------##
  ##---------------socket 傳輸手臂命令-----------------
 def Socket_command():
-    global Socket
+    global arm_mode_flag,data
+    # if arm_mode_flag ==  True:
+    #     arm_mode_flag = False
     for case in switch(socket_cmd.action):
         #-------PtP Mode--------
         if case(Taskcmd.Action_Type.PtoP):
@@ -175,7 +177,7 @@ def Socket_command():
     Socket.send(data)
 ##-----------socket client--------
 def socket_client():
-    global Socket
+    #global Socket
     try:
         #Socket = client()
         Socket.get_connect()

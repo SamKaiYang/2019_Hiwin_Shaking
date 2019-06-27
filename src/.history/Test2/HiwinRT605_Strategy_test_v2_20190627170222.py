@@ -46,7 +46,7 @@ def callback(state):
     # rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
     Arm_state_flag = state.data[0]
     Sent_data_flag = state.data[1]
-    #print(state.data)
+    print(state.data)
 def arm_state_listener():
     #rospy.init_node(NAME)
     #s = rospy.Service('arm_state',arm_state, Arm_state) ##server arm state
@@ -92,8 +92,6 @@ action = 0
 
 def Mission_Trigger():
     global action,Arm_state_flag,Sent_data_flag
-    #print("Arm :",Arm_state_flag)
-    #print("Sent:",Sent_data_flag)
     if Arm_state_flag == Arm_status.Idle and Sent_data_flag == 1:
         Sent_data_flag = 0
         Arm_state_flag = Arm_status.Isbusy
@@ -180,7 +178,7 @@ if __name__ == '__main__':
     rospy.init_node('strategy', anonymous=True)
     GetInfoFlag = True #Test no data
     arm_state_listener()
-    start_input=int(input('開始策略請按1,離開請按3 : ')) #輸入開始指令
+    #start_input=int(input('開始策略請按1,離開請按3 : ')) #輸入開始指令
     start_input = 1
     if start_input==1:
         while 1:

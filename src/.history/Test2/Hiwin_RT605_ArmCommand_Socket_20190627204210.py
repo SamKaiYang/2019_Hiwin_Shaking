@@ -128,7 +128,6 @@ def socket_talker(): ##創建Server node
 ##----------socket 封包傳輸--------------##
  ##---------------socket 傳輸手臂命令-----------------
 def Socket_command():
-    global Socket
     for case in switch(socket_cmd.action):
         #-------PtP Mode--------
         if case(Taskcmd.Action_Type.PtoP):
@@ -175,7 +174,7 @@ def Socket_command():
     Socket.send(data)
 ##-----------socket client--------
 def socket_client():
-    global Socket
+    #global Socket
     try:
         #Socket = client()
         Socket.get_connect()
