@@ -144,6 +144,8 @@ def Socket_command():
     global arm_mode_flag,speed_mode_flag,point_data_flag
     if arm_mode_flag ==  True:
         arm_mode_flag = False
+        speed_mode_flag = False
+        point_data_flag = False
         for case in switch(socket_cmd.action):
             #-------PtP Mode--------
             if case(Taskcmd.Action_Type.PtoP):
@@ -185,8 +187,6 @@ def Socket_command():
                 break
         socket_cmd.action= 5 ##切換初始mode狀態
         Socket.send(data.encode('utf-8'))#socket傳送for python to translate str
-        # Socket_sent_flag = True
-        # socket_client_sent_flag(Socket_sent_flag)
 ##-----------socket client--------
 def socket_client():
     global Socket,Arm_feedback,data,Socket_sent_flag

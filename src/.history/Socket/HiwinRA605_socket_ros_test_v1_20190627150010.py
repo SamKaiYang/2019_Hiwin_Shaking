@@ -144,6 +144,8 @@ def Socket_command():
     global arm_mode_flag,speed_mode_flag,point_data_flag
     if arm_mode_flag ==  True:
         arm_mode_flag = False
+        speed_mode_flag = False
+        point_data_flag = False
         for case in switch(socket_cmd.action):
             #-------PtP Mode--------
             if case(Taskcmd.Action_Type.PtoP):
