@@ -8,8 +8,8 @@ import threading
 import time
 import sys
 import matplotlib as plot
-import HiwinRA605_socket_TCPcmd as TCP
-import HiwinRA605_socket_Taskcmd as Taskcmd
+import HiwinRA605_socket_TCPcmd_v3 as TCP
+import HiwinRA605_socket_Taskcmd_v3 as Taskcmd
 import numpy as np
 from std_msgs.msg import String
 from ROS_Socket.srv import *
@@ -73,8 +73,7 @@ state_feedback = StateFeedback(0,0)
 
 class client():
     def __init__(self):
-        #self.get_connect()
-        pass
+        self.get_connect()
 
     def get_connect(self):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -92,31 +91,32 @@ class client():
 
 Socket = client()
 
+
 def point_data(x,y,z,pitch,roll,yaw): ##接收策略端傳送位姿資料
-    pos.x = x
-    pos.y = y
-    pos.z = z
-    pos.pitch = pitch
-    pos.roll = roll
-    pos.yaw = yaw
+    pos.x = '%s'%x
+    pos.y = '%s'%y
+    pos.z = '%s'%z
+    pos.pitch = '%s'%pitch
+    pos.roll = '%s'%roll
+    pos.yaw = '%s'%yaw
 ##----------Arm Mode-------------###
 def Arm_Mode(action,grip,ra,setvel,setboth): ##接收策略端傳送手臂模式資料
     global arm_mode_flag
-    socket_cmd.action = action
-    socket_cmd.grip = grip
-    socket_cmd.ra = ra
-    socket_cmd.setvel = setvel
-    socket_cmd.setboth = setboth
+    socket_cmd.action = int('%s'%action)
+    socket_cmd.grip = int('%s'%grip)
+    socket_cmd.ra = int('%s'%ra)
+    socket_cmd.setvel = int('%s'%setvel)
+    socket_cmd.setboth = int('%s'%setboth)
     arm_mode_flag = True
     Socket_command()
 ##-------Arm Speed Mode------------###
 def Speed_Mode(speedmode): ##接收策略端傳送手臂模式資料
-    socket_cmd.Speedmode = speedmode
+    socket_cmd.Speedmode = int('%s'%speedmode)
 def socket_talker(): ##創建Server node
 
     pub = rospy.Publisher('chatter', Int32MultiArray, queue_size=10)
     rospy.init_node(NAME)
-    rate = rospy.Rate(10) # 10hz
+    rate = rospy.Rate(200) # 10hz
     print ("Ready to connect")
     while not rospy.is_shutdown():
         # hello_str = "hello world %s" % rospy.get_time()
@@ -169,16 +169,14 @@ def Socket_command():
             data = TCP.Set_SpeedMode(socket_cmd.grip,socket_cmd.Speedmode)
             break
     socket_cmd.action= 6 ##切換初始mode狀態
-    print(data)
-    print("Socket:", Socket)
-    #Socket.send(data.encode('utf-8'))#socket傳送for python to translate str
     Socket.send(data)
 ##-----------socket client--------
 def socket_client():
     global Socket
     try:
         #Socket = client()
-        Socket.get_connect()
+        #Socket.get_connect()
+        #print("Socket_client :",dir(Socket))
         #Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         #Socket.connect(('192.168.0.1', 8080))#iclab 5 ＆ iclab hiwin
 
@@ -187,7 +185,6 @@ def socket_client():
     except socket.error as msg:
         print(msg)
         sys.exit(1)
-    #print('Connection has been successful')
     Socket_feedback(Socket)
     rospy.on_shutdown(myhook)
     Socket.close()

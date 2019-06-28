@@ -11,8 +11,8 @@ from ROS_Socket.srv import *
 from ROS_Socket.msg import *
 import math
 import enum
-#import Hiwin_RT605_ArmCommand_Socket as ArmTask
-import Hiwin_RT605_Arm_Command_v2 as ArmTask # 0628
+import Hiwin_RT605_Socket_v3 as ArmTask
+#import Hiwin_RT605_Arm_Command_v3 as ArmTask # 0628
 from std_msgs.msg import Int32MultiArray
 ##----Arm state-----------
 Arm_state_flag = 0
@@ -24,35 +24,11 @@ class Arm_status(enum.IntEnum):
     Isbusy = 1
     Error = 2
     shutdown = 6
-#-----------server feedback arm state----------
-# def Arm_state(req):
-#     global CurrentMissionType,Strategy_flag,Arm_state_flag
-#     Arm_state_flag = int('%s'%req.Arm_state)
-#     if Arm_state_flag  == Arm_status.Isbusy: #表示手臂忙碌
-#         Strategy_flag = False
-#         return(1)
-#     if Arm_state_flag  == Arm_status.Idle: #表示手臂準備
-#         Strategy_flag = True
-#         return(0)
-#     if Arm_state_flag  == Arm_status.shutdown: #表示程式中斷
-#         Strategy_flag = 6
-#         return(6)
-# ##-----------server feedback Sent_flag----------
-# def Sent_flag(req):
-#     global Sent_data_flag
-#     Sent_data_flag = int('%s'%req.sent_flag)
-#     return(1)
 def callback(state):
     global Arm_state_flag,Sent_data_flag
-    # rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
     Arm_state_flag = state.data[0]
     Sent_data_flag = state.data[1]
-    #print(state.data)
 def arm_state_listener():
-    #rospy.init_node(NAME)
-    #s = rospy.Service('arm_state',arm_state, Arm_state) ##server arm state
-    #a = rospy.Service('sent_flag',sent_flag,Sent_flag)
-    #rospy.spin() ## spin one
 
     rospy.Subscriber("chatter", Int32MultiArray, callback)
 ##-----------switch define------------##
@@ -93,8 +69,6 @@ action = 0
 
 def Mission_Trigger():
     global action,Arm_state_flag,Sent_data_flag
-    #print("Arm :",Arm_state_flag)
-    #print("Sent:",Sent_data_flag)
     if Arm_state_flag == Arm_status.Idle and Sent_data_flag == 1:
         Sent_data_flag = 0
         Arm_state_flag = Arm_status.Isbusy
@@ -108,10 +82,10 @@ def Mission_Trigger():
                 pos.yaw = 0
                 action = 1
                 print('x: ',pos.x,' y: ',pos.y,' z: ',pos.z,' pitch: ',pos.pitch,' roll: ',pos.roll,' yaw: ',pos.yaw)
-                ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
-                ArmTask.strategy_client_Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
-                # ArmTask.point_data(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
-                # ArmTask.Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
+                # ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
+                # ArmTask.strategy_client_Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
+                ArmTask.point_data(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
+                ArmTask.Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
                 break
             if case(1):
                 pos.x = 10
@@ -122,10 +96,10 @@ def Mission_Trigger():
                 pos.yaw = 0
                 action = 2
                 print('x: ',pos.x,' y: ',pos.y,' z: ',pos.z,' pitch: ',pos.pitch,' roll: ',pos.roll,' yaw: ',pos.yaw)
-                ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
-                ArmTask.strategy_client_Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
-                # ArmTask.point_data(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
-                # ArmTask.Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
+                #ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
+                #ArmTask.strategy_client_Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
+                ArmTask.point_data(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
+                ArmTask.Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
                 break
             if case(2):
                 pos.x = -10
@@ -136,10 +110,10 @@ def Mission_Trigger():
                 pos.yaw = 0
                 action = 3
                 print('x: ',pos.x,' y: ',pos.y,' z: ',pos.z,' pitch: ',pos.pitch,' roll: ',pos.roll,' yaw: ',pos.yaw)
-                ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
-                ArmTask.strategy_client_Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
-                # ArmTask.point_data(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
-                # ArmTask.Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
+                #ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
+                #ArmTask.strategy_client_Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
+                ArmTask.point_data(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
+                ArmTask.Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
                 break
             if case(3):
                 pos.x = -10
@@ -150,10 +124,10 @@ def Mission_Trigger():
                 pos.yaw = 0
                 action = 4
                 print('x: ',pos.x,' y: ',pos.y,' z: ',pos.z,' pitch: ',pos.pitch,' roll: ',pos.roll,' yaw: ',pos.yaw)
-                ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
-                ArmTask.strategy_client_Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
-                # ArmTask.point_data(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
-                # ArmTask.Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
+                #ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
+                #ArmTask.strategy_client_Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
+                ArmTask.point_data(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
+                ArmTask.Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
                 break
             if case(4):
                 pos.x = 0
@@ -164,10 +138,10 @@ def Mission_Trigger():
                 pos.yaw = 0
                 action = 0
                 print('x: ',pos.x,' y: ',pos.y,' z: ',pos.z,' pitch: ',pos.pitch,' roll: ',pos.roll,' yaw: ',pos.yaw)
-                ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
-                ArmTask.strategy_client_Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
-                # ArmTask.point_data(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
-                # ArmTask.Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
+                #ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
+                #ArmTask.strategy_client_Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
+                ArmTask.point_data(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
+                ArmTask.Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
                 break
             if case(): # default, could also just omit condition or 'if True'
                 rospy.on_shutdown(myhook)
@@ -190,10 +164,10 @@ if __name__ == '__main__':
     start_input = 1
     if start_input==1:
         while 1:
-            time.sleep(0.2) #0627 最穩定 delay 0.3秒
-            # my_list=[]
-            # for i in range(2500000):
-            #     my_list.append(i)
+            #time.sleep(0.1) #0627 最穩定 delay 0.3秒
+            my_list=[]
+            for i in range(1000000):
+                my_list.append(i)
             Mission_Trigger()
     if start_input == 3:
         pass

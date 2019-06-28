@@ -12,7 +12,7 @@ from ROS_Socket.msg import *
 import math
 import enum
 #import Hiwin_RT605_ArmCommand_Socket as ArmTask
-import Hiwin_RT605_Arm_Command_v2 as ArmTask # 0628
+import Hiwin_RT605_Arm_Command_v3 as ArmTask # 0628
 from std_msgs.msg import Int32MultiArray
 ##----Arm state-----------
 Arm_state_flag = 0

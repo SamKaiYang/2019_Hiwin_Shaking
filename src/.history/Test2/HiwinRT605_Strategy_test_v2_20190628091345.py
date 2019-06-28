@@ -24,7 +24,7 @@ class Arm_status(enum.IntEnum):
     Isbusy = 1
     Error = 2
     shutdown = 6
-#-----------server feedback arm state----------
+##-----------server feedback arm state----------
 # def Arm_state(req):
 #     global CurrentMissionType,Strategy_flag,Arm_state_flag
 #     Arm_state_flag = int('%s'%req.Arm_state)
@@ -190,7 +190,7 @@ if __name__ == '__main__':
     start_input = 1
     if start_input==1:
         while 1:
-            time.sleep(0.2) #0627 最穩定 delay 0.3秒
+            time.sleep(0.3) #0627 最穩定 delay 0.3秒
             # my_list=[]
             # for i in range(2500000):
             #     my_list.append(i)

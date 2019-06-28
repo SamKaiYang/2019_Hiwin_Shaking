@@ -24,7 +24,7 @@ class Arm_status(enum.IntEnum):
     Isbusy = 1
     Error = 2
     shutdown = 6
-#-----------server feedback arm state----------
+##-----------server feedback arm state----------
 # def Arm_state(req):
 #     global CurrentMissionType,Strategy_flag,Arm_state_flag
 #     Arm_state_flag = int('%s'%req.Arm_state)
@@ -108,7 +108,6 @@ def Mission_Trigger():
                 pos.yaw = 0
                 action = 1
                 print('x: ',pos.x,' y: ',pos.y,' z: ',pos.z,' pitch: ',pos.pitch,' roll: ',pos.roll,' yaw: ',pos.yaw)
-                ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
                 ArmTask.strategy_client_Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
                 # ArmTask.point_data(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
                 # ArmTask.Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
@@ -122,7 +121,6 @@ def Mission_Trigger():
                 pos.yaw = 0
                 action = 2
                 print('x: ',pos.x,' y: ',pos.y,' z: ',pos.z,' pitch: ',pos.pitch,' roll: ',pos.roll,' yaw: ',pos.yaw)
-                ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
                 ArmTask.strategy_client_Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
                 # ArmTask.point_data(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
                 # ArmTask.Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
@@ -136,7 +134,6 @@ def Mission_Trigger():
                 pos.yaw = 0
                 action = 3
                 print('x: ',pos.x,' y: ',pos.y,' z: ',pos.z,' pitch: ',pos.pitch,' roll: ',pos.roll,' yaw: ',pos.yaw)
-                ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
                 ArmTask.strategy_client_Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
                 # ArmTask.point_data(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
                 # ArmTask.Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
@@ -150,7 +147,6 @@ def Mission_Trigger():
                 pos.yaw = 0
                 action = 4
                 print('x: ',pos.x,' y: ',pos.y,' z: ',pos.z,' pitch: ',pos.pitch,' roll: ',pos.roll,' yaw: ',pos.yaw)
-                ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
                 ArmTask.strategy_client_Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
                 # ArmTask.point_data(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
                 # ArmTask.Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
@@ -164,8 +160,8 @@ def Mission_Trigger():
                 pos.yaw = 0
                 action = 0
                 print('x: ',pos.x,' y: ',pos.y,' z: ',pos.z,' pitch: ',pos.pitch,' roll: ',pos.roll,' yaw: ',pos.yaw)
-                ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
                 ArmTask.strategy_client_Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
+                ArmTask.strategy_client_pos_move(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
                 # ArmTask.point_data(pos.x,pos.y,pos.z,pos.pitch,pos.roll,pos.yaw)
                 # ArmTask.Arm_Mode(2,1,0,10,2)#action,ra,grip,vel,both
                 break
@@ -190,7 +186,7 @@ if __name__ == '__main__':
     start_input = 1
     if start_input==1:
         while 1:
-            time.sleep(0.2) #0627 最穩定 delay 0.3秒
+            time.sleep(0.3) #0627 最穩定 delay 0.3秒
             # my_list=[]
             # for i in range(2500000):
             #     my_list.append(i)
