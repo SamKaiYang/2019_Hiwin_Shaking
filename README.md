@@ -10,7 +10,7 @@
 # 可以使用test檔案在src/Test底下的程式,複製到自己關卡資料夾裡
 # 再撰寫自己關卡的launch檔
 # 勿動到原生檔案,指你下載就有的,主要是不要push上來
-8. roslaunch test.launch 
+8. roslaunch ROS_Socket test.launch 
 
 # yolo_v3_keras
 The demo code of YOLO_V3
