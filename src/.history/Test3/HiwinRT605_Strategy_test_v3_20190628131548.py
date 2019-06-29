@@ -164,7 +164,7 @@ if __name__ == '__main__':
     start_input = 1
     if start_input==1:
         while 1:
-            time.sleep(0.2) #0627 最穩定 delay 0.3秒
+            time.sleep(0.1) #0627 最穩定 delay 0.3秒
             # my_list=[]
             # for i in range(1000000):
             #     my_list.append(i)
