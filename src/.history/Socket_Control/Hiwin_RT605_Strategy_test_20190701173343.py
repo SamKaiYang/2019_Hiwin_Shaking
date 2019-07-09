@@ -68,7 +68,7 @@ action = 0
 
 def Mission_Trigger():
     global action,Arm_state_flag,Sent_data_flag
-    if Arm_state_flag == Arm_status.Idle and Sent_data_flag == 1:
+    if Arm_state_flag == Arm_status.Idle :#and Sent_data_flag == 1:
         #Sent_data_flag = 0
         #Arm_state_flag = Arm_status.Isbusy
         for case in switch(action): #傳送指令給socket選擇手臂動作
@@ -160,10 +160,10 @@ if __name__ == '__main__':
     GetInfoFlag = True #Test no data
     arm_state_listener()
     start_input=int(input('開始策略請按1,離開請按3 : ')) #輸入開始指令
-    #start_input = 1
+    start_input = 1
     if start_input==1:
         while 1:
-            time.sleep(0.1) #0628 最穩定 delay 0.2秒
+            #time.sleep(0.1) #0628 最穩定 delay 0.2秒
             # 加入cnt
             # my_list=[]
             # for i in range(1000000):

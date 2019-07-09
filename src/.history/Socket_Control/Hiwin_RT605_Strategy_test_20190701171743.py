@@ -160,7 +160,7 @@ if __name__ == '__main__':
     GetInfoFlag = True #Test no data
     arm_state_listener()
     start_input=int(input('開始策略請按1,離開請按3 : ')) #輸入開始指令
-    #start_input = 1
+    start_input = 1
     if start_input==1:
         while 1:
             time.sleep(0.1) #0628 最穩定 delay 0.2秒

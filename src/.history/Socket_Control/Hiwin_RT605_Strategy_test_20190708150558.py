@@ -163,7 +163,7 @@ if __name__ == '__main__':
     #start_input = 1
     if start_input==1:
         while 1:
-            time.sleep(0.1) #0628 最穩定 delay 0.2秒
+            time.sleep(0.2) #0628 最穩定 delay 0.2秒
             # 加入cnt
             # my_list=[]
             # for i in range(1000000):

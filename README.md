@@ -6,11 +6,11 @@
 5. cd ~/catkin_ws
 6. catkin_make
 7. source ./devel/setup.bash
-# 可以使用test.launch 做上銀手臂跑點測試
-# 可以使用test檔案在src/Test底下的程式,複製到自己關卡資料夾裡
+# 可以使用Hiwin_RT605_Strategy_test.launch 做上銀手臂跑點測試
+# 可以使用測試檔案在src/Socket_Control底下的程式,複製到自己關卡資料夾裡
 # 再撰寫自己關卡的launch檔
 # 勿動到原生檔案,指你下載就有的,主要是不要push上來
-8. roslaunch ROS_Socket test.launch 
+8.roslaunch ROS_Socket Hiwin_RT605_Strategy_test.launch 
 
 # yolo_v3_keras
 The demo code of YOLO_V3
