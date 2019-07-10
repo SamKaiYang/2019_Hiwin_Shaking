@@ -19,8 +19,8 @@ class Grip_Cmd(enum.IntEnum):
     CATCH =1
     WID_1 = 2
     WID_2 = 3
-    CATCH_OPEN = 5
-    CATCH_LOOSEN = 6
+    CATCH_OPEN = 6
+    CATCH_LOOSEN = 7
 ##---------enum CTRL Mode
 class Ctrl_Mode(enum.IntEnum):
     CTRL_POS = 0

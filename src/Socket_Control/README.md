@@ -2,11 +2,11 @@
 
 roslaunch ROS_Socket Hiwin_RT605_Strategy_test.launch 
 
-#更新時間 20190709
+#更新時間 20190710
 
 #注意
-1. 主程式封包處理完成,尚須delay(目前測試0.1ms即可),跳動作問題也解決
-2. 手臂電腦主程式Socket執行過久或傳送太久會當掉,尚解決,可能因記憶體空間不足,暫時避免方式，手臂程式Socket定時重開
+1. 主程式封包處理完成,尚須delay(目前測試0.05ms即可),跳動作問題也解決
+2. 手臂電腦主程式Socket執行過久或傳送太久會當掉,已解決
 
 #程式注意
 1. 呼叫手臂動作如:point_data,Arm_Mode,Speed_Mode
