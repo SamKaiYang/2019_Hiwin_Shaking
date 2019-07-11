@@ -68,7 +68,7 @@ def Set_SpeedMode(GripCmd,Mode):
 def Is_busy(Cmd):
     feedback = Cmd
     return feedback
-
+    
 def Set_Suction(GripCmd,Suction):
     Cmd = "# " + str(int(Taskcmd.Action_Type.Suction))+" "\
     +str(int(GripCmd))+" "\

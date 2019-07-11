@@ -112,9 +112,6 @@ def Arm_Mode(action,grip,ra,setvel,setboth): ##接收策略端傳送手臂模式
 ##-------Arm Speed Mode------------###
 def Speed_Mode(speedmode): ##接收策略端傳送手臂模式資料
     socket_cmd.Speedmode = int('%s'%speedmode)
-##-------Arm Speed Mode------------###
-def Suction_Mode(suction): ##接收策略端傳送手臂模式資料
-    socket_cmd.Suction = int('%s'%suction)
 def socket_talker(): ##創建Server node
 
     pub = rospy.Publisher('chatter', Int32MultiArray, queue_size=10)
@@ -173,9 +170,9 @@ def Socket_command():
             break
         #------吸盤------------
         if case(Taskcmd.Action_Type.Suction):
-            data = TCP.Set_Suction(socket_cmd.grip,socket_cmd.Suction)
+            data = TCP.Set_SpeedMode(socket_cmd.grip,socket_cmd.Suction)
             break
-    socket_cmd.action= 10 ##切換初始mode狀態
+    socket_cmd.action= 6 ##切換初始mode狀態
     Socket.send(data)
 ##-----------socket client--------
 def socket_client():
@@ -216,7 +213,7 @@ def myhook():
     print ("shutdown time!")
 
 if __name__ == '__main__':
-    socket_cmd.action = 10##切換初始mode狀態
+    socket_cmd.action = 6##切換初始mode狀態
     ## 多執行緒
     t = threading.Thread(target=socket_client)
     t.start() # 開啟多執行緒

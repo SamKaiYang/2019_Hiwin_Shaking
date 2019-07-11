@@ -2,8 +2,9 @@
 
 roslaunch ROS_Socket Hiwin_RT605_Strategy_test.launch 
 
-#更新時間 20190710
-
+#更新時間 20190711
+#新增
+1. 吸盤功能,待測試
 #注意
 1. 主程式封包處理完成,尚須delay(目前測試0.05ms即可),跳動作問題也解決
 2. 手臂電腦主程式Socket執行過久或傳送太久會當掉,已解決

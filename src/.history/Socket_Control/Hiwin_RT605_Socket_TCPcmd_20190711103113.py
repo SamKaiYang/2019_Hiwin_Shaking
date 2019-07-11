@@ -69,6 +69,12 @@ def Is_busy(Cmd):
     feedback = Cmd
     return feedback
 
+def feedback_check():
+    Cmd = "# " + str(int(Taskcmd.Action_Type.Check))+" "\
+    +str(int(0))+" "\
+    +str(int(0))+" "\
+    " *"
+    return Cmd
 def Set_Suction(GripCmd,Suction):
     Cmd = "# " + str(int(Taskcmd.Action_Type.Suction))+" "\
     +str(int(GripCmd))+" "\

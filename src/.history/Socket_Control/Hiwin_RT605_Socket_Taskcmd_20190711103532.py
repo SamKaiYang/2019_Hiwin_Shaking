@@ -6,7 +6,8 @@ class Action_Type(enum.IntEnum):
     PtoP = 2
     Line = 3
     Mode = 4
-    Suction = 5
+    Check = 5
+    Suction = 6
 ##------------enum Arm feedback
 class Arm_feedback_Type(enum.IntEnum):
     Idle = 0

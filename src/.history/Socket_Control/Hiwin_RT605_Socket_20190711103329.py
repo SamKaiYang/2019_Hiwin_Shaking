@@ -216,7 +216,7 @@ def myhook():
     print ("shutdown time!")
 
 if __name__ == '__main__':
-    socket_cmd.action = 10##切換初始mode狀態
+    socket_cmd.action = 6##切換初始mode狀態
     ## 多執行緒
     t = threading.Thread(target=socket_client)
     t.start() # 開啟多執行緒
