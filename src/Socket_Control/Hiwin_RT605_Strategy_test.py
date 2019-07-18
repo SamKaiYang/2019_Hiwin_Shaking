@@ -13,6 +13,12 @@ import math
 import enum
 import Hiwin_RT605_Socket as ArmTask
 from std_msgs.msg import Int32MultiArray
+#----------rqt------------
+from dynamic_reconfigure.server import Server
+from ROS_Socket.cfg import TutorialsConfig
+#---------parameter-----------
+PushHeight = 11.35
+AboveHeight = 11.35
 ##----Arm state-----------
 Arm_state_flag = 0
 Strategy_flag = 0
@@ -67,7 +73,7 @@ pos = point(0,36.8,11.35,-90,0,0)
 action = 0
 
 def Mission_Trigger():
-    global action,Arm_state_flag,Sent_data_flag
+    global action,Arm_state_flag,Sent_data_flag,PushHeight,AboveHeight
     if Arm_state_flag == Arm_status.Idle and Sent_data_flag == 1:
         for case in switch(action): #傳送指令給socket選擇手臂動作
             if case(0):
@@ -85,7 +91,7 @@ def Mission_Trigger():
             if case(1):
                 pos.x = 10
                 pos.y = 36.8
-                pos.z = 11.35
+                pos.z = PushHeight
                 pos.pitch = -90
                 pos.roll = 0
                 pos.yaw = 0
@@ -97,7 +103,7 @@ def Mission_Trigger():
             if case(2):
                 pos.x = 10
                 pos.y = 42
-                pos.z = 11.35
+                pos.z = AboveHeight
                 pos.pitch = -90
                 pos.roll = 0
                 pos.yaw = 0
@@ -109,7 +115,7 @@ def Mission_Trigger():
             if case(3):
                 pos.x = 10
                 pos.y = 42
-                pos.z = 11.35
+                pos.z = PushHeight
                 pos.pitch = -90
                 pos.roll = 0
                 pos.yaw = 0
@@ -121,7 +127,7 @@ def Mission_Trigger():
             if case(4):
                 pos.x = 0
                 pos.y = 36.8
-                pos.z = 11.35
+                pos.z = AboveHeight
                 pos.pitch = -90
                 pos.roll = 0
                 pos.yaw = 0
@@ -142,9 +148,18 @@ def Mission_Trigger():
 ##-------------strategy end ------------
 def myhook():
     print ("shutdown time!")
+def rqt_callback(config, level):
+    global PushHeight,AboveHeight
+    # rospy.loginfo("""Reconfigure Request: {int_param}, {double_param},\
+    #       {str_param}, {bool_param}, {size}""".format(**config))
+    rospy.loginfo("""Reconfigure Request: {Work_Height}, {parameter_num}""".format(**config))
+    PushHeight = config.Work_Height
+    AboveHeight = config.parameter_num
+    return config
 if __name__ == '__main__':
     argv = rospy.myargv()
     rospy.init_node('strategy', anonymous=True)
+    srv = Server(TutorialsConfig, rqt_callback)
     GetInfoFlag = True #Test no data
     arm_state_listener()
     start_input=int(input('開始策略請按1,離開請按3 : ')) #輸入開始指令
