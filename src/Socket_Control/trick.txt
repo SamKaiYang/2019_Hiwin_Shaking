@@ -1,0 +1,1 @@
+You can use python3 -m pip as a synonym for pip3
